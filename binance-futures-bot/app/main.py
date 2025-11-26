@@ -1,0 +1,369 @@
+"""
+Binance Futures Trading Bot - 主入口
+"""
+import asyncio
+import logging
+import signal
+from contextlib import asynccontextmanager
+from typing import List
+
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from sqlalchemy import select
+
+from app.config import settings, config_manager
+from app.database import init_db, DatabaseManager
+from app.models import TradingPair, SystemConfig
+from app.api.routes import router as api_router
+from app.services.binance_api import binance_api
+from app.services.binance_ws import binance_ws, KlineData
+from app.services.strategy import ema_strategy, SignalType
+from app.services.position_manager import position_manager
+from app.services.trailing_stop import trailing_stop_manager
+from app.services.telegram import telegram_service, channel_listener
+from app.utils.helpers import setup_logging
+
+# 配置日志
+setup_logging("INFO")
+logger = logging.getLogger(__name__)
+
+
+class TradingEngine:
+    """交易引擎 - 核心交易逻辑"""
+    
+    def __init__(self):
+        self._running = False
+        self._kline_cache: dict = {}  # {symbol: [klines]}
+        self._amplitude_check_task = None
+    
+    async def on_kline(self, kline: KlineData):
+        """处理K线数据回调"""
+        symbol = kline.symbol
+        
+        # 更新缓存
+        if symbol not in self._kline_cache:
+            self._kline_cache[symbol] = []
+        
+        # 只有K线收盘时才处理
+        if not kline.is_closed:
+            return
+        
+        # 添加到缓存
+        kline_data = [
+            kline.open_time, 
+            str(kline.open_price),
+            str(kline.high_price),
+            str(kline.low_price),
+            str(kline.close_price),
+            str(kline.volume),
+            kline.close_time
+        ]
+        self._kline_cache[symbol].append(kline_data)
+        
+        # 保持最近300根K线
+        if len(self._kline_cache[symbol]) > 300:
+            self._kline_cache[symbol] = self._kline_cache[symbol][-300:]
+        
+        # 检查是否有足够的K线数据
+        if len(self._kline_cache[symbol]) < 60:
+            return
+        
+        # 获取交易对配置
+        session = await DatabaseManager.get_session()
+        try:
+            result = await session.execute(
+                select(TradingPair).where(
+                    TradingPair.symbol == symbol,
+                    TradingPair.is_active == True,
+                    TradingPair.is_amplitude_disabled == False
+                )
+            )
+            pair = result.scalar_one_or_none()
+            if not pair:
+                return
+            
+            # 检查是否已有仓位
+            if await position_manager.has_position(symbol):
+                return
+            
+            # 运行策略
+            signal = ema_strategy.analyze(symbol, self._kline_cache[symbol])
+            
+            if signal.signal_type == SignalType.NONE:
+                logger.debug(f"{symbol}: {signal.message}")
+                return
+            
+            logger.info(f"Signal detected: {symbol} - {signal.signal_type.value} - {signal.message}")
+            
+            # 计算下单数量
+            quantity = await binance_api.calculate_order_quantity(
+                symbol=symbol,
+                leverage=pair.leverage
+            )
+            
+            if quantity <= 0:
+                logger.warning(f"{symbol}: Calculated quantity is 0")
+                return
+            
+            # 开仓
+            side = "LONG" if signal.signal_type == SignalType.LONG else "SHORT"
+            await position_manager.open_position(
+                symbol=symbol,
+                side=side,
+                entry_price=signal.price,
+                quantity=quantity,
+                leverage=pair.leverage,
+                stop_loss_percent=pair.stop_loss_percent
+            )
+            
+        except Exception as e:
+            logger.error(f"Trading engine error for {symbol}: {e}")
+        finally:
+            await session.close()
+    
+    async def check_amplitude(self):
+        """检查振幅并禁用低振幅交易对"""
+        while self._running:
+            try:
+                await asyncio.sleep(3600)  # 每小时检查一次
+                
+                session = await DatabaseManager.get_session()
+                try:
+                    result = await session.execute(
+                        select(TradingPair).where(
+                            TradingPair.is_active == True,
+                            TradingPair.is_amplitude_disabled == False
+                        )
+                    )
+                    pairs = result.scalars().all()
+                    
+                    for pair in pairs:
+                        # 获取K线数据
+                        klines = await binance_api.get_klines(
+                            symbol=pair.symbol,
+                            interval=pair.strategy_interval,
+                            limit=settings.AMPLITUDE_CHECK_KLINES
+                        )
+                        
+                        # 计算振幅
+                        amplitude = ema_strategy.calculate_amplitude(klines)
+                        
+                        if amplitude < settings.MIN_AMPLITUDE_PERCENT:
+                            # 禁用该交易对
+                            pair.is_amplitude_disabled = True
+                            await session.commit()
+                            
+                            # 取消订阅
+                            await binance_ws.unsubscribe(pair.symbol)
+                            
+                            # TG通知
+                            msg = (
+                                f"⚠️ **振幅禁用**\n"
+                                f"交易对: {pair.symbol}\n"
+                                f"振幅: {amplitude:.2f}%\n"
+                                f"阈值: {settings.MIN_AMPLITUDE_PERCENT}%\n"
+                                f"已自动停止交易"
+                            )
+                            await telegram_service.send_message(msg)
+                            logger.info(f"{pair.symbol} disabled due to low amplitude: {amplitude}%")
+                
+                finally:
+                    await session.close()
+                    
+            except Exception as e:
+                logger.error(f"Amplitude check error: {e}")
+    
+    async def start(self):
+        """启动交易引擎"""
+        self._running = True
+        
+        # 注册K线回调
+        binance_ws.add_callback(self.on_kline)
+        
+        # 启动振幅检查任务
+        self._amplitude_check_task = asyncio.create_task(self.check_amplitude())
+        
+        logger.info("Trading engine started")
+    
+    async def stop(self):
+        """停止交易引擎"""
+        self._running = False
+        
+        binance_ws.remove_callback(self.on_kline)
+        
+        if self._amplitude_check_task:
+            self._amplitude_check_task.cancel()
+            try:
+                await self._amplitude_check_task
+            except asyncio.CancelledError:
+                pass
+        
+        logger.info("Trading engine stopped")
+
+
+# 创建交易引擎实例
+trading_engine = TradingEngine()
+
+
+async def load_config_from_db():
+    """从数据库加载配置"""
+    session = await DatabaseManager.get_session()
+    try:
+        result = await session.execute(select(SystemConfig))
+        configs = result.scalars().all()
+        
+        for config in configs:
+            if config.key == "BINANCE_API_KEY":
+                settings.BINANCE_API_KEY = config.value
+            elif config.key == "BINANCE_API_SECRET":
+                settings.BINANCE_API_SECRET = config.value
+            elif config.key == "BINANCE_TESTNET":
+                settings.BINANCE_TESTNET = config.value.lower() == "true"
+            elif config.key == "TG_BOT_TOKEN":
+                settings.TG_BOT_TOKEN = config.value
+            elif config.key == "TG_CHAT_ID":
+                settings.TG_CHAT_ID = config.value
+            elif config.key == "TG_API_ID":
+                settings.TG_API_ID = int(config.value) if config.value else 0
+            elif config.key == "TG_API_HASH":
+                settings.TG_API_HASH = config.value
+        
+        logger.info("Config loaded from database")
+    finally:
+        await session.close()
+
+
+async def subscribe_active_pairs():
+    """订阅所有活跃的交易对"""
+    session = await DatabaseManager.get_session()
+    try:
+        result = await session.execute(
+            select(TradingPair).where(
+                TradingPair.is_active == True,
+                TradingPair.is_amplitude_disabled == False
+            )
+        )
+        pairs = result.scalars().all()
+        
+        for pair in pairs:
+            await binance_ws.subscribe(pair.symbol, pair.strategy_interval)
+            # 预加载K线数据
+            try:
+                klines = await binance_api.get_klines(
+                    symbol=pair.symbol,
+                    interval=pair.strategy_interval,
+                    limit=200
+                )
+                trading_engine._kline_cache[pair.symbol] = klines
+            except Exception as e:
+                logger.error(f"Failed to preload klines for {pair.symbol}: {e}")
+        
+        logger.info(f"Subscribed to {len(pairs)} trading pairs")
+    finally:
+        await session.close()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """应用生命周期管理"""
+    logger.info("Starting Binance Futures Bot...")
+    
+    # 初始化数据库
+    await init_db()
+    
+    # 从数据库加载配置
+    await load_config_from_db()
+    
+    # 初始化Telegram
+    await telegram_service.initialize()
+    
+    # 加载持仓
+    await position_manager.load_positions()
+    
+    # 启动WebSocket
+    await binance_ws.start()
+    
+    # 订阅交易对
+    await subscribe_active_pairs()
+    
+    # 启动交易引擎
+    await trading_engine.start()
+    
+    # 启动移动止损管理器
+    await trailing_stop_manager.start()
+    
+    # 启动TG频道监听（如果配置了）
+    if settings.TG_API_ID and settings.TG_API_HASH:
+        await channel_listener.start()
+    
+    # 发送启动通知
+    await telegram_service.send_message("🚀 **Binance Futures Bot 已启动**")
+    
+    logger.info("Bot started successfully!")
+    
+    yield
+    
+    # 关闭服务
+    logger.info("Shutting down...")
+    
+    await trailing_stop_manager.stop()
+    await trading_engine.stop()
+    await binance_ws.stop()
+    await channel_listener.stop()
+    await binance_api.close()
+    
+    await telegram_service.send_message("🛑 **Binance Futures Bot 已停止**")
+    
+    logger.info("Bot stopped.")
+
+
+# 创建FastAPI应用
+app = FastAPI(
+    title="Binance Futures Bot",
+    description="币安合约交易机器人",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# 挂载静态文件
+# app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+# 模板
+templates = Jinja2Templates(directory="app/templates")
+
+# 注册API路由
+app.include_router(api_router, prefix="/api", tags=["API"])
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    """主页"""
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/health")
+async def health_check():
+    """健康检查"""
+    return {
+        "status": "ok",
+        "websocket": binance_ws.get_status(),
+        "positions": len(position_manager.get_all_positions())
+    }
+
+
+def main():
+    """主函数"""
+    import uvicorn
+    
+    uvicorn.run(
+        "app.main:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=settings.DEBUG
+    )
+
+
+if __name__ == "__main__":
+    main()
