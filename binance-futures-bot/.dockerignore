@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.eggs
+*.egg-info
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv
+.venv
+ENV
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Data (will be mounted)
+data/
+
+# Docs
+*.md
+docs/
+
+# Tests
+tests/
+pytest.ini
+.pytest_cache
+
+# Misc
+.env.example
+.DS_Store
