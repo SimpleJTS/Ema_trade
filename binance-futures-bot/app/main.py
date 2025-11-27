@@ -24,6 +24,7 @@ from app.services.position_manager import position_manager
 from app.services.trailing_stop import trailing_stop_manager
 from app.services.telegram import telegram_service, channel_listener
 from app.utils.helpers import setup_logging
+from app.utils.encryption import decrypt, encryption_manager
 
 # 配置日志
 setup_logging("INFO")
@@ -208,29 +209,46 @@ trading_engine = TradingEngine()
 
 
 async def load_config_from_db():
-    """从数据库加载配置"""
+    """从数据库加载配置（自动解密加密的配置）"""
     session = await DatabaseManager.get_session()
     try:
         result = await session.execute(select(SystemConfig))
         configs = result.scalars().all()
         
-        for config in configs:
-            if config.key == "BINANCE_API_KEY":
-                settings.BINANCE_API_KEY = config.value
-            elif config.key == "BINANCE_API_SECRET":
-                settings.BINANCE_API_SECRET = config.value
-            elif config.key == "BINANCE_TESTNET":
-                settings.BINANCE_TESTNET = config.value.lower() == "true"
-            elif config.key == "TG_BOT_TOKEN":
-                settings.TG_BOT_TOKEN = config.value
-            elif config.key == "TG_CHAT_ID":
-                settings.TG_CHAT_ID = config.value
-            elif config.key == "TG_API_ID":
-                settings.TG_API_ID = int(config.value) if config.value else 0
-            elif config.key == "TG_API_HASH":
-                settings.TG_API_HASH = config.value
+        encrypted_count = 0
+        loaded_count = 0
         
-        logger.info("已从数据库加载配置")
+        for config in configs:
+            value = config.value
+            
+            # 检查是否是加密的值，如果是则解密
+            if value and value.startswith("ENC:"):
+                value = decrypt(value)
+                encrypted_count += 1
+            
+            if config.key == "BINANCE_API_KEY" and value:
+                settings.BINANCE_API_KEY = value
+                loaded_count += 1
+            elif config.key == "BINANCE_API_SECRET" and value:
+                settings.BINANCE_API_SECRET = value
+                loaded_count += 1
+            elif config.key == "BINANCE_TESTNET":
+                settings.BINANCE_TESTNET = value.lower() == "true" if value else False
+            elif config.key == "TG_BOT_TOKEN" and value:
+                settings.TG_BOT_TOKEN = value
+                loaded_count += 1
+            elif config.key == "TG_CHAT_ID" and value:
+                settings.TG_CHAT_ID = value
+                loaded_count += 1
+            elif config.key == "TG_API_ID":
+                settings.TG_API_ID = int(value) if value else 0
+            elif config.key == "TG_API_HASH" and value:
+                settings.TG_API_HASH = value
+        
+        if loaded_count > 0:
+            logger.info(f"已从数据库加载 {loaded_count} 项配置（其中 {encrypted_count} 项已解密）")
+        else:
+            logger.info("数据库中未找到已保存的配置，请通过Web界面配置API密钥")
     finally:
         await session.close()
 
