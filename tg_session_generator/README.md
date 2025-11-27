@@ -1,87 +1,123 @@
 # Telegram Session 文件生成器
 
-这是一个简单的Python脚本，用于在**本地交互式终端**中登录Telegram并生成session文件。
+在 Docker / Linux 环境中生成 Telegram session 文件，解决 `EOF when reading a line` 问题。
 
-## 为什么需要这个？
+## 快速开始 (Docker)
 
-当你在Docker容器、后台服务或某些IDE中运行Telegram登录程序时，可能会遇到 `EOF when reading a line` 错误。这是因为这些环境不支持标准输入（stdin）的交互式输入。
-
-解决方案是：
-1. 在本地电脑的终端中运行此脚本生成session文件
-2. 将生成的 `.session` 文件复制到目标程序所在目录
-
-## 使用方法
-
-### 1. 安装依赖
+### 第一步：设置环境变量并发送验证码
 
 ```bash
-pip install -r requirements.txt
+# 设置 API 凭据 (从 https://my.telegram.org/apps 获取)
+export TG_API_ID=你的API_ID
+export TG_API_HASH=你的API_HASH
+export TG_PHONE=+8613800138000
+
+# 运行脚本
+./run_docker.sh
 ```
 
-或者直接：
+### 第二步：输入验证码完成登录
 
 ```bash
+# 设置收到的验证码
+export TG_CODE=12345
+
+# 如果有两步验证，还需要设置密码
+export TG_PASSWORD=你的两步验证密码
+
+# 再次运行
+./run_docker.sh
+```
+
+### 第三步：获取 session 文件
+
+成功后，session 文件会保存在 `./sessions/telegram_session.session`
+
+---
+
+## 手动 Docker 命令
+
+如果不使用脚本，可以手动执行：
+
+```bash
+# 构建镜像
+docker build -t tg-session .
+
+# 第一步：发送验证码
+docker run --rm -v $(pwd):/app \
+    -e TG_API_ID=123456 \
+    -e TG_API_HASH=abcdef \
+    -e TG_PHONE=+8613800138000 \
+    tg-session
+
+# 第二步：输入验证码
+docker run --rm -v $(pwd):/app \
+    -e TG_API_ID=123456 \
+    -e TG_API_HASH=abcdef \
+    -e TG_PHONE=+8613800138000 \
+    -e TG_CODE=12345 \
+    tg-session
+```
+
+---
+
+## 直接运行 Python (非 Docker)
+
+```bash
+# 安装依赖
 pip install telethon
-```
 
-### 2. 获取 API 凭据
-
-访问 https://my.telegram.org/apps 创建应用并获取：
-- API ID（数字）
-- API Hash（字符串）
-
-### 3. 运行脚本
-
-```bash
+# 方式1: 环境变量
+export TG_API_ID=123456
+export TG_API_HASH=abcdef
+export TG_PHONE=+8613800138000
 python generate_session.py
+
+# 方式2: 命令行参数
+python generate_session.py \
+    --api-id 123456 \
+    --api-hash abcdef \
+    --phone +8613800138000 \
+    --code 12345
 ```
 
-### 4. 按提示操作
+---
 
-1. 输入 API ID
-2. 输入 API Hash
-3. 输入 Session 文件名（默认为 `telegram_session`）
-4. 输入手机号（带国际区号，如 `+8613800138000`）
-5. 输入收到的验证码
-6. 如果启用了两步验证，还需要输入密码
+## 所有环境变量
 
-### 5. 使用生成的 Session 文件
+| 变量 | 必需 | 说明 |
+|------|------|------|
+| `TG_API_ID` | ✅ | Telegram API ID (数字) |
+| `TG_API_HASH` | ✅ | Telegram API Hash |
+| `TG_PHONE` | ✅ | 手机号，带国际区号 |
+| `TG_CODE` | ⚠️ | 验证码 (发送后需要) |
+| `TG_PASSWORD` | ❌ | 两步验证密码 (如果启用) |
+| `TG_SESSION` | ❌ | Session 文件名，默认 `telegram_session` |
 
-脚本执行成功后，会在当前目录生成一个 `.session` 文件（如 `telegram_session.session`）。
+---
 
-将此文件复制到你的目标程序目录中，在代码中这样使用：
+## 使用生成的 Session 文件
 
 ```python
 from telethon import TelegramClient
 
-# 使用已有的session文件（不需要再次登录）
+# 使用已生成的 session 文件
 client = TelegramClient('telegram_session', api_id, api_hash)
 
-# 连接并使用
-await client.connect()
-# 此时已经是登录状态
+async def main():
+    await client.connect()
+    # 已经是登录状态，无需再次验证
+    me = await client.get_me()
+    print(f"已登录: {me.first_name}")
+
+import asyncio
+asyncio.run(main())
 ```
+
+---
 
 ## 注意事项
 
-- ⚠️ **请妥善保管 `.session` 文件，它包含你的登录凭据**
-- ⚠️ **不要将 `.session` 文件提交到公开的代码仓库**
-- Session 文件如果长时间不使用可能会失效，需要重新生成
+- ⚠️ 请妥善保管 `.session` 文件
+- ⚠️ 不要将 `.session` 文件提交到 Git
 - 建议在 `.gitignore` 中添加 `*.session`
-
-## 故障排除
-
-### 错误：`telethon` 模块未找到
-
-```bash
-pip install telethon
-```
-
-### 错误：验证码无效
-
-- 确保输入的是最新收到的验证码
-- 注意验证码可能会通过其他已登录的Telegram客户端发送
-
-### 错误：两步验证密码错误
-
-- 确保输入的是正确的两步验证密码（不是手机验证码）
