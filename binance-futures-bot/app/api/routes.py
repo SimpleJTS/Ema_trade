@@ -20,6 +20,7 @@ from app.services.binance_api import binance_api
 from app.services.binance_ws import binance_ws
 from app.services.position_manager import position_manager
 from app.services.telegram import telegram_service
+from app.utils.encryption import encrypt, encryption_manager
 
 logger = logging.getLogger(__name__)
 
@@ -162,19 +163,20 @@ async def get_config_status():
         binance_configured=bool(settings.BINANCE_API_KEY and settings.BINANCE_API_SECRET),
         binance_testnet=settings.BINANCE_TESTNET,
         telegram_configured=bool(settings.TG_BOT_TOKEN and settings.TG_CHAT_ID),
-        channel_listener_configured=bool(settings.TG_API_ID and settings.TG_API_HASH)
+        channel_listener_configured=bool(settings.TG_API_ID and settings.TG_API_HASH),
+        encryption_enabled=encryption_manager.is_available
     )
 
 
 @router.post("/config/binance", response_model=MessageResponse)
 async def update_binance_config(data: BinanceConfigUpdate):
-    """更新币安API配置"""
+    """更新币安API配置（加密存储）"""
     session = await DatabaseManager.get_session()
     try:
-        # 保存到数据库
+        # 加密敏感数据后保存到数据库
         configs = [
-            ("BINANCE_API_KEY", data.api_key, "币安API Key"),
-            ("BINANCE_API_SECRET", data.api_secret, "币安API Secret"),
+            ("BINANCE_API_KEY", encrypt(data.api_key), "币安API Key (加密)"),
+            ("BINANCE_API_SECRET", encrypt(data.api_secret), "币安API Secret (加密)"),
             ("BINANCE_TESTNET", str(data.testnet), "是否使用测试网")
         ]
         
@@ -185,16 +187,18 @@ async def update_binance_config(data: BinanceConfigUpdate):
             config = result.scalar_one_or_none()
             if config:
                 config.value = value
+                config.description = desc
             else:
                 config = SystemConfig(key=key, value=value, description=desc)
                 session.add(config)
         
         await session.commit()
         
-        # 更新运行时配置
+        # 更新运行时配置（使用明文）
         config_manager.update_binance_config(data.api_key, data.api_secret, data.testnet)
         
-        return MessageResponse(success=True, message="币安API配置已更新")
+        encrypted_status = "已加密" if encryption_manager.is_available else "未加密（加密器不可用）"
+        return MessageResponse(success=True, message=f"币安API配置已更新（{encrypted_status}）")
     except Exception as e:
         await session.rollback()
         raise HTTPException(status_code=500, detail=str(e))
@@ -204,18 +208,19 @@ async def update_binance_config(data: BinanceConfigUpdate):
 
 @router.post("/config/telegram", response_model=MessageResponse)
 async def update_telegram_config(data: TelegramConfigUpdate):
-    """更新Telegram配置"""
+    """更新Telegram配置（加密存储）"""
     session = await DatabaseManager.get_session()
     try:
+        # 加密敏感数据后保存
         configs = [
-            ("TG_BOT_TOKEN", data.bot_token, "Telegram Bot Token"),
-            ("TG_CHAT_ID", data.chat_id, "Telegram Chat ID"),
+            ("TG_BOT_TOKEN", encrypt(data.bot_token), "Telegram Bot Token (加密)"),
+            ("TG_CHAT_ID", data.chat_id, "Telegram Chat ID"),  # Chat ID 不需要加密
         ]
         
         if data.api_id:
             configs.append(("TG_API_ID", str(data.api_id), "Telegram API ID"))
         if data.api_hash:
-            configs.append(("TG_API_HASH", data.api_hash, "Telegram API Hash"))
+            configs.append(("TG_API_HASH", encrypt(data.api_hash), "Telegram API Hash (加密)"))
         
         for key, value, desc in configs:
             result = await session.execute(
@@ -224,13 +229,14 @@ async def update_telegram_config(data: TelegramConfigUpdate):
             config = result.scalar_one_or_none()
             if config:
                 config.value = value
+                config.description = desc
             else:
                 config = SystemConfig(key=key, value=value, description=desc)
                 session.add(config)
         
         await session.commit()
         
-        # 更新运行时配置
+        # 更新运行时配置（使用明文）
         config_manager.update_telegram_config(
             data.bot_token, data.chat_id,
             data.api_id or 0, data.api_hash or ""
@@ -239,7 +245,8 @@ async def update_telegram_config(data: TelegramConfigUpdate):
         # 重新初始化Telegram服务
         await telegram_service.initialize()
         
-        return MessageResponse(success=True, message="Telegram配置已更新")
+        encrypted_status = "已加密" if encryption_manager.is_available else "未加密（加密器不可用）"
+        return MessageResponse(success=True, message=f"Telegram配置已更新（{encrypted_status}）")
     except Exception as e:
         await session.rollback()
         raise HTTPException(status_code=500, detail=str(e))

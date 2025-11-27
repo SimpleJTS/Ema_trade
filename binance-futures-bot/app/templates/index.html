@@ -552,6 +552,26 @@
 
         <!-- Config Panel -->
         <div class="panel" id="config-panel">
+            <!-- 配置状态卡片 -->
+            <div class="stats-grid" id="config-status-grid">
+                <div class="stat-card">
+                    <div class="stat-label">币安 API</div>
+                    <div class="stat-value" id="binance-status">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Telegram</div>
+                    <div class="stat-value" id="telegram-status">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">加密存储</div>
+                    <div class="stat-value" id="encryption-status">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">频道监听</div>
+                    <div class="stat-value" id="channel-status">--</div>
+                </div>
+            </div>
+
             <div class="card">
                 <h2 class="card-title" style="margin-bottom: 24px;">币安 API 配置</h2>
                 <form id="binance-form">
@@ -934,12 +954,19 @@
         document.getElementById('binance-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
-                await apiCall('/config/binance', 'POST', {
+                const result = await apiCall('/config/binance', 'POST', {
                     api_key: document.getElementById('binance-api-key').value,
                     api_secret: document.getElementById('binance-api-secret').value,
                     testnet: document.getElementById('binance-testnet').checked
                 });
-                showToast('币安配置已保存');
+                showToast(result.message || '币安配置已保存');
+                // 清空输入框（已加密保存）
+                document.getElementById('binance-api-key').value = '';
+                document.getElementById('binance-api-secret').value = '';
+                document.getElementById('binance-api-key').placeholder = '••••••••（已保存）';
+                document.getElementById('binance-api-secret').placeholder = '••••••••（已保存）';
+                loadConfigStatus();
+                loadBalance();
             } catch (e) {
                 showToast(e.message, 'error');
             }
@@ -948,13 +975,19 @@
         document.getElementById('telegram-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
-                await apiCall('/config/telegram', 'POST', {
+                const result = await apiCall('/config/telegram', 'POST', {
                     bot_token: document.getElementById('tg-bot-token').value,
                     chat_id: document.getElementById('tg-chat-id').value,
                     api_id: parseInt(document.getElementById('tg-api-id').value) || null,
                     api_hash: document.getElementById('tg-api-hash').value || null
                 });
-                showToast('Telegram配置已保存');
+                showToast(result.message || 'Telegram配置已保存');
+                // 清空敏感输入框（已加密保存）
+                document.getElementById('tg-bot-token').value = '';
+                document.getElementById('tg-bot-token').placeholder = '••••••••（已保存）';
+                document.getElementById('tg-api-hash').value = '';
+                document.getElementById('tg-api-hash').placeholder = '••••••••（已保存）';
+                loadConfigStatus();
             } catch (e) {
                 showToast(e.message, 'error');
             }
@@ -979,14 +1012,49 @@
             }
         }
 
+        // Load config status
+        async function loadConfigStatus() {
+            try {
+                const status = await apiCall('/config/status');
+                
+                // 币安状态
+                const binanceEl = document.getElementById('binance-status');
+                binanceEl.textContent = status.binance_configured ? '✓ 已配置' : '✗ 未配置';
+                binanceEl.style.color = status.binance_configured ? 'var(--accent-green)' : 'var(--accent-red)';
+                binanceEl.style.fontSize = '1rem';
+                
+                // Telegram状态
+                const telegramEl = document.getElementById('telegram-status');
+                telegramEl.textContent = status.telegram_configured ? '✓ 已配置' : '✗ 未配置';
+                telegramEl.style.color = status.telegram_configured ? 'var(--accent-green)' : 'var(--accent-red)';
+                telegramEl.style.fontSize = '1rem';
+                
+                // 加密状态
+                const encryptionEl = document.getElementById('encryption-status');
+                encryptionEl.textContent = status.encryption_enabled ? '🔒 已启用' : '🔓 未启用';
+                encryptionEl.style.color = status.encryption_enabled ? 'var(--accent-green)' : 'var(--accent-yellow)';
+                encryptionEl.style.fontSize = '1rem';
+                
+                // 频道监听状态
+                const channelEl = document.getElementById('channel-status');
+                channelEl.textContent = status.channel_listener_configured ? '✓ 已配置' : '- 未配置';
+                channelEl.style.color = status.channel_listener_configured ? 'var(--accent-green)' : 'var(--text-secondary)';
+                channelEl.style.fontSize = '1rem';
+            } catch (e) {
+                console.error('Failed to load config status:', e);
+            }
+        }
+
         // Initial load
         loadPairs();
         loadWsStatus();
         loadBalance();
+        loadConfigStatus();
         
         // Refresh periodically
         setInterval(loadWsStatus, 30000);
         setInterval(loadBalance, 60000);
+        setInterval(loadConfigStatus, 60000);
     </script>
 </body>
 </html>

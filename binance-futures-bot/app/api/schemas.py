@@ -64,6 +64,7 @@ class SystemConfigResponse(BaseModel):
     binance_testnet: bool
     telegram_configured: bool
     channel_listener_configured: bool
+    encryption_enabled: bool = True  # 是否启用加密存储
 
 
 # ========== Position Schemas ==========
