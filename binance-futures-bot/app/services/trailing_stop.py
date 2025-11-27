@@ -130,6 +130,9 @@ class TrailingStopManager:
         """止损检查循环"""
         while self._running:
             try:
+                # 先同步交易所实际持仓状态，清理已平仓的仓位
+                await self._sync_positions_with_exchange()
+                
                 positions = position_manager.get_all_positions()
                 
                 for position in positions:
@@ -147,6 +150,30 @@ class TrailingStopManager:
             except Exception as e:
                 logger.error(f"移动止损检查循环错误: {e}")
                 await asyncio.sleep(self._check_interval)
+    
+    async def _sync_positions_with_exchange(self):
+        """同步交易所实际持仓，清理已平仓的仓位"""
+        try:
+            # 获取交易所实际持仓
+            exchange_positions = await binance_api.get_position()
+            exchange_symbols = {p["symbol"] for p in exchange_positions}
+            
+            # 获取本地缓存的仓位
+            local_positions = position_manager.get_all_positions()
+            
+            for position in local_positions:
+                if position.symbol not in exchange_symbols:
+                    # 交易所已无持仓，可能是止损触发或手动平仓
+                    logger.warning(f"[{position.symbol}] 检测到交易所已无持仓，触发同步平仓处理")
+                    try:
+                        # 使用 mark_position_closed 只更新本地状态，不再下单
+                        await position_manager.mark_position_closed(position.symbol, reason="STOP_LOSS")
+                        # 清理追踪数据
+                        self.reset_tracking(position.symbol)
+                    except Exception as e:
+                        logger.error(f"[{position.symbol}] 同步平仓失败: {e}")
+        except Exception as e:
+            logger.error(f"同步交易所持仓状态失败: {e}")
     
     async def start(self):
         """启动移动止损检查"""

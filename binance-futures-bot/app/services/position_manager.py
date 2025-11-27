@@ -430,10 +430,102 @@ class PositionManager:
             for symbol in list(self._positions.keys()):
                 if symbol not in exchange_symbols:
                     logger.warning(f"[{symbol}] 交易所中未找到该持仓，标记为已平仓")
-                    await self.close_position(symbol, reason="EXCHANGE_SYNC")
+                    await self.mark_position_closed(symbol, reason="EXCHANGE_SYNC")
             
         except Exception as e:
             logger.error(f"同步仓位状态失败: {e}")
+    
+    async def mark_position_closed(self, symbol: str, reason: str = "STOP_LOSS", 
+                                     close_price: float = None) -> bool:
+        """标记仓位已平仓（不下单，仅更新本地状态）
+        
+        用于处理交易所已经平仓但本地缓存未同步的情况
+        
+        Args:
+            symbol: 交易对
+            reason: 平仓原因
+            close_price: 平仓价格（可选，不提供则获取当前价格）
+        """
+        session = await DatabaseManager.get_session()
+        try:
+            position = self._positions.get(symbol)
+            if not position:
+                logger.warning(f"[{symbol}] 未找到持仓，无需标记")
+                return False
+            
+            # 获取平仓价格
+            if close_price is None:
+                try:
+                    close_price = await binance_api.get_current_price(symbol)
+                except Exception:
+                    close_price = position.stop_loss_price  # 使用止损价作为估算
+            
+            # 计算盈亏
+            if position.side == "LONG":
+                pnl = (close_price - position.entry_price) * position.quantity
+                pnl_percent = ((close_price - position.entry_price) / position.entry_price) * 100 * position.leverage
+            else:
+                pnl = (position.entry_price - close_price) * position.quantity
+                pnl_percent = ((position.entry_price - close_price) / position.entry_price) * 100 * position.leverage
+            
+            # 更新仓位记录
+            await session.execute(
+                update(Position)
+                .where(Position.id == position.id)
+                .values(
+                    status="CLOSED",
+                    pnl=pnl,
+                    pnl_percent=pnl_percent,
+                    closed_at=datetime.utcnow(),
+                    close_reason=reason
+                )
+            )
+            await session.commit()
+            
+            # 从缓存移除
+            del self._positions[symbol]
+            
+            # 记录交易日志
+            trade_log = TradeLog(
+                symbol=symbol,
+                action=f"CLOSE_{reason}",
+                price=close_price,
+                quantity=position.quantity,
+                message=f"仓位已平仓(交易所同步): 价格≈{format_price_full(close_price)}, 盈亏≈{format_price_full(pnl)} USDT ({pnl_percent:.2f}%)",
+                extra_data={
+                    "entry_price": position.entry_price,
+                    "pnl": pnl,
+                    "pnl_percent": pnl_percent,
+                    "reason": reason,
+                    "sync_type": "exchange_sync"
+                }
+            )
+            session.add(trade_log)
+            await session.commit()
+            
+            logger.info(f"[{symbol}] 仓位已标记平仓: 原因={reason}, 估算盈亏={pnl_percent:.2f}%")
+            
+            # TG通知
+            emoji = "🟢" if pnl >= 0 else "🔴"
+            msg = (
+                f"{emoji} **止损触发通知**\n"
+                f"交易对: {symbol}\n"
+                f"方向: {'做多' if position.side == 'LONG' else '做空'}\n"
+                f"入场价: {format_price_full(position.entry_price)}\n"
+                f"止损价: {format_price_full(position.stop_loss_price)}\n"
+                f"估算盈亏: {format_price_full(pnl)} USDT ({pnl_percent:.2f}%)\n"
+                f"原因: {reason}"
+            )
+            await telegram_service.send_message(msg)
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"[{symbol}] 标记仓位平仓失败: {e}")
+            await session.rollback()
+            return False
+        finally:
+            await session.close()
     
     def get_all_positions(self) -> List[Position]:
         """获取所有仓位"""
