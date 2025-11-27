@@ -5,6 +5,7 @@
 import asyncio
 import logging
 from datetime import datetime
+from decimal import Decimal
 from typing import Optional, Dict, List
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -325,17 +326,20 @@ class PositionManager:
                 except Exception as e:
                     logger.warning(f"Cancel old stop order error: {e}")
             
-            # 获取精度
-            price_precision, qty_precision, min_qty, step_size = await binance_api.get_symbol_precision(symbol)
-            new_stop_price = binance_api.round_price(new_stop_price, price_precision)
+            # 获取精度信息
+            precision_info = await binance_api.get_symbol_precision(symbol)
+            formatted_price = binance_api.format_price(new_stop_price, precision_info)
             
             # 验证新止损价格
-            if new_stop_price <= 0:
-                raise ValueError(f"Invalid new stop price: {new_stop_price}")
+            if Decimal(formatted_price) <= 0:
+                raise ValueError(f"Invalid new stop price: {new_stop_price} -> {formatted_price}")
             
             # 验证仓位数量
             if position.quantity <= 0:
                 raise ValueError(f"Invalid position quantity: {position.quantity}")
+            
+            # 更新 new_stop_price 为格式化后的值
+            new_stop_price = float(formatted_price)
             
             logger.info(f"Updating stop loss: symbol={symbol}, new_price={new_stop_price}, qty={position.quantity}")
             
