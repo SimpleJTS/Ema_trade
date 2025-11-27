@@ -320,6 +320,23 @@ class PositionManager:
             if not position:
                 return False
             
+            # 获取精度信息并格式化价格（提前格式化，用于比较）
+            precision_info = await binance_api.get_symbol_precision(symbol)
+            formatted_price = binance_api.format_price(new_stop_price, precision_info)
+            
+            # 验证新止损价格
+            if Decimal(formatted_price) <= 0:
+                raise ValueError(f"无效的新止损价格: {new_stop_price} -> {formatted_price}")
+            
+            # 格式化当前止损价格用于比较
+            current_formatted_price = binance_api.format_price(position.stop_loss_price, precision_info) if position.stop_loss_price else "0"
+            
+            # 优化：如果格式化后的止损价格没有变化，跳过更新，避免不必要的API调用
+            if formatted_price == current_formatted_price:
+                logger.debug(f"[{symbol}] 止损价格未变化 ({formatted_price})，跳过更新")
+                await session.close()
+                return True
+            
             # 取消原止损单
             if position.stop_loss_order_id:
                 try:
@@ -327,14 +344,6 @@ class PositionManager:
                     logger.info(f"[{symbol}] 已取消原止损单: {position.stop_loss_order_id}")
                 except Exception as e:
                     logger.warning(f"[{symbol}] 取消原止损单失败: {e}")
-            
-            # 获取精度信息
-            precision_info = await binance_api.get_symbol_precision(symbol)
-            formatted_price = binance_api.format_price(new_stop_price, precision_info)
-            
-            # 验证新止损价格
-            if Decimal(formatted_price) <= 0:
-                raise ValueError(f"无效的新止损价格: {new_stop_price} -> {formatted_price}")
             
             # 验证仓位数量
             if position.quantity <= 0:
