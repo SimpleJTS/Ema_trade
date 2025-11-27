@@ -36,7 +36,7 @@ class PositionManager:
             positions = result.scalars().all()
             for pos in positions:
                 self._positions[pos.symbol] = pos
-            logger.info(f"Loaded {len(self._positions)} open positions")
+            logger.info(f"已加载 {len(self._positions)} 个持仓")
         finally:
             await session.close()
     
@@ -68,7 +68,7 @@ class PositionManager:
         try:
             # 检查是否已有仓位
             if await self.has_position(symbol):
-                logger.warning(f"Already have position for {symbol}")
+                logger.warning(f"[{symbol}] 已存在持仓，跳过开仓")
                 return None
             
             # 设置杠杆
@@ -87,7 +87,7 @@ class PositionManager:
                 quantity=quantity
             )
             
-            logger.info(f"Market order placed: {order_result}")
+            logger.info(f"[{symbol}] 市价单已提交: 订单ID={order_result.get('orderId')}, 方向={'做多' if side == 'LONG' else '做空'}")
             
             # 获取实际成交价格
             # 优先使用avgPrice，如果为0则通过累计成交额/累计成交量计算，最后使用entry_price
@@ -102,22 +102,22 @@ class PositionManager:
                     actual_price = cum_quote / executed_qty
                 else:
                     actual_price = entry_price
-                logger.warning(f"avgPrice not available, calculated price: {actual_price}")
+                logger.warning(f"[{symbol}] avgPrice不可用，使用计算价格: {format_price_full(actual_price)}")
             
             actual_qty = float(order_result.get("executedQty", 0))
             if actual_qty <= 0:
                 actual_qty = quantity
-                logger.warning(f"executedQty not available, using quantity: {actual_qty}")
+                logger.warning(f"[{symbol}] executedQty不可用，使用传入数量: {actual_qty}")
             
             # 验证成交价格和数量
             if actual_price <= 0:
-                raise ValueError(f"Invalid execution price: {actual_price}")
+                raise ValueError(f"无效的成交价格: {actual_price}")
             if actual_qty <= 0:
-                raise ValueError(f"Invalid execution quantity: {actual_qty}")
+                raise ValueError(f"无效的成交数量: {actual_qty}")
             
             # 验证止损百分比
             if stop_loss_percent <= 0 or stop_loss_percent >= 100:
-                raise ValueError(f"Invalid stop_loss_percent: {stop_loss_percent} (must be between 0 and 100)")
+                raise ValueError(f"无效的止损百分比: {stop_loss_percent} (必须在0-100之间)")
             
             # 计算止损价格
             if side == "LONG":
@@ -127,9 +127,9 @@ class PositionManager:
             
             # 验证止损价格
             if stop_loss_price <= 0:
-                raise ValueError(f"Invalid stop_loss_price: {stop_loss_price} (entry={actual_price}, percent={stop_loss_percent}%)")
+                raise ValueError(f"无效的止损价格: {stop_loss_price} (入场价={actual_price}, 止损比例={stop_loss_percent}%)")
             
-            logger.info(f"Setting stop loss: symbol={symbol}, side={side}, price={stop_loss_price}, qty={actual_qty}")
+            logger.info(f"[{symbol}] 设置止损单: 方向={'做多' if side == 'LONG' else '做空'}, 止损价={format_price_full(stop_loss_price)}, 数量={actual_qty}")
             
             # 设置止损单
             stop_side = "SELL" if side == "LONG" else "BUY"
@@ -196,7 +196,7 @@ class PositionManager:
             return position
             
         except Exception as e:
-            logger.error(f"Open position error: {e}")
+            logger.error(f"[{symbol}] 开仓失败: {e}")
             await session.rollback()
             await telegram_service.send_message(f"❌ 开仓失败: {symbol}\n错误: {str(e)}")
             raise
@@ -214,14 +214,15 @@ class PositionManager:
         try:
             position = self._positions.get(symbol)
             if not position:
-                logger.warning(f"No position found for {symbol}")
+                logger.warning(f"[{symbol}] 未找到持仓，无法平仓")
                 return False
             
             # 取消所有挂单
             try:
                 await binance_api.cancel_all_orders(symbol)
+                logger.info(f"[{symbol}] 已取消所有挂单")
             except Exception as e:
-                logger.warning(f"Cancel orders error: {e}")
+                logger.warning(f"[{symbol}] 取消挂单失败: {e}")
             
             # 获取当前价格
             current_price = await binance_api.get_current_price(symbol)
@@ -296,7 +297,7 @@ class PositionManager:
             return True
             
         except Exception as e:
-            logger.error(f"Close position error: {e}")
+            logger.error(f"[{symbol}] 平仓失败: {e}")
             await session.rollback()
             await telegram_service.send_message(f"❌ 平仓失败: {symbol}\n错误: {str(e)}")
             raise
@@ -323,9 +324,9 @@ class PositionManager:
             if position.stop_loss_order_id:
                 try:
                     await binance_api.cancel_order(symbol, position.stop_loss_order_id)
-                    logger.info(f"Cancelled old stop loss order: {position.stop_loss_order_id}")
+                    logger.info(f"[{symbol}] 已取消原止损单: {position.stop_loss_order_id}")
                 except Exception as e:
-                    logger.warning(f"Cancel old stop order error: {e}")
+                    logger.warning(f"[{symbol}] 取消原止损单失败: {e}")
             
             # 获取精度信息
             precision_info = await binance_api.get_symbol_precision(symbol)
@@ -333,16 +334,18 @@ class PositionManager:
             
             # 验证新止损价格
             if Decimal(formatted_price) <= 0:
-                raise ValueError(f"Invalid new stop price: {new_stop_price} -> {formatted_price}")
+                raise ValueError(f"无效的新止损价格: {new_stop_price} -> {formatted_price}")
             
             # 验证仓位数量
             if position.quantity <= 0:
-                raise ValueError(f"Invalid position quantity: {position.quantity}")
+                raise ValueError(f"无效的仓位数量: {position.quantity}")
             
             # 更新 new_stop_price 为格式化后的值
             new_stop_price = float(formatted_price)
             
-            logger.info(f"Updating stop loss: symbol={symbol}, new_price={new_stop_price}, qty={position.quantity}")
+            level_desc = f"级别{level}" if level else "初始"
+            trailing_desc = "追踪止损" if is_trailing else "固定止损"
+            logger.info(f"[{symbol}] 更新止损: 新价格={format_price_full(new_stop_price)}, {level_desc}, {trailing_desc}")
             
             # 设置新止损单
             stop_side = "SELL" if position.side == "LONG" else "BUY"
@@ -411,7 +414,7 @@ class PositionManager:
             return True
             
         except Exception as e:
-            logger.error(f"Update stop loss error: {e}")
+            logger.error(f"[{symbol}] 更新止损失败: {e}")
             await session.rollback()
             raise
         finally:
@@ -426,11 +429,11 @@ class PositionManager:
             # 检查本地仓位是否还存在于交易所
             for symbol in list(self._positions.keys()):
                 if symbol not in exchange_symbols:
-                    logger.warning(f"Position {symbol} not found on exchange, marking as closed")
+                    logger.warning(f"[{symbol}] 交易所中未找到该持仓，标记为已平仓")
                     await self.close_position(symbol, reason="EXCHANGE_SYNC")
             
         except Exception as e:
-            logger.error(f"Sync positions error: {e}")
+            logger.error(f"同步仓位状态失败: {e}")
     
     def get_all_positions(self) -> List[Position]:
         """获取所有仓位"""
