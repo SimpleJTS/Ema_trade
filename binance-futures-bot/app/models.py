@@ -15,7 +15,7 @@ class TradingPair(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     symbol: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
     leverage: Mapped[int] = mapped_column(Integer, default=10)
-    strategy_interval: Mapped[str] = mapped_column(String(10), default="15m")  # K线周期
+    strategy_interval: Mapped[str] = mapped_column(String(10), default="1m")  # K线周期
     stop_loss_percent: Mapped[float] = mapped_column(Float, default=2.0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_amplitude_disabled: Mapped[bool] = mapped_column(Boolean, default=False)  # 振幅禁用标记

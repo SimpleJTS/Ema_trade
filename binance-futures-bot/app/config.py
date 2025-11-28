@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     
     # 交易默认参数
     DEFAULT_LEVERAGE: int = 10
-    DEFAULT_STRATEGY_INTERVAL: str = "15m"
+    DEFAULT_STRATEGY_INTERVAL: str = "1m"
     DEFAULT_STOP_LOSS_PERCENT: float = 2.0
     POSITION_SIZE_PERCENT: float = 10.0  # 账户余额的10%
     
