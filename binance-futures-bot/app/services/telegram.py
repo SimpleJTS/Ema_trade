@@ -121,8 +121,8 @@ async def on_new_symbol_detected(symbol: str, change_percent: float):
         msg = (
             f"🆕 **自动添加交易对**\n"
             f"交易对: {symbol}\n"
-            f"24H变化: {direction} {abs(change_percent)}%\n"
-            f"来源: TG频道监听"
+            f"24H变化: {direction} {abs(change_percent):.2f}%\n"
+            f"来源: 币安24H涨跌幅监控"
         )
         await telegram_service.send_message(msg)
         

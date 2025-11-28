@@ -27,7 +27,7 @@
 - 开仓/平仓通知
 - 止损调整通知
 - 振幅禁用通知
-- 频道监听：自动添加24H涨幅30%的币种
+- 24H涨跌幅监控：自动添加涨跌幅绝对值超30%的币种（直接调用币安API）
 
 ### Web管理界面
 - 交易对管理（增删改查）
@@ -97,8 +97,6 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 | `BINANCE_TESTNET` | 是否使用测试网 | false |
 | `TG_BOT_TOKEN` | Telegram Bot Token | - |
 | `TG_CHAT_ID` | Telegram Chat ID | - |
-| `TG_API_ID` | Telegram API ID（用于频道监听） | - |
-| `TG_API_HASH` | Telegram API Hash | - |
 | `DEFAULT_LEVERAGE` | 默认杠杆 | 10 |
 | `DEFAULT_STRATEGY_INTERVAL` | 默认K线周期 | 15m |
 | `DEFAULT_STOP_LOSS_PERCENT` | 默认止损百分比 | 2.0 |
@@ -108,8 +106,6 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 1. **Bot Token**: 与 [@BotFather](https://t.me/BotFather) 对话创建Bot
 2. **Chat ID**: 与 [@userinfobot](https://t.me/userinfobot) 对话获取
-3. **API ID/Hash** (可选): 在 [my.telegram.org](https://my.telegram.org) 获取
-4. **Session文件**: 将 `tgsession.session` 放到 `data/` 目录下（会挂载到容器的 `/app/data/`）
 
 ## 🎯 使用指南
 
@@ -202,9 +198,6 @@ A: 该币种近200根K线振幅<7%，已自动停止交易以避免低波动行�
 
 ### Q: 如何使用测试网？
 A: 设置环境变量 `BINANCE_TESTNET=true`，使用测试网API密钥。
-
-### Q: 频道监听报错 "EOF when reading a line"？
-A: 把 `tgsession.session` 文件放到 `data/` 目录下，确保挂载到容器。
 
 ## 📝 更新日志
 
