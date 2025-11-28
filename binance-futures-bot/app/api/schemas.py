@@ -12,7 +12,7 @@ class TradingPairBase(BaseModel):
     """交易对基础模型"""
     symbol: str = Field(..., description="交易对名称，如BTCUSDT")
     leverage: int = Field(default=10, ge=1, le=125, description="杠杆倍数")
-    strategy_interval: str = Field(default="15m", description="K线周期")
+    strategy_interval: str = Field(default="1m", description="K线周期")
     stop_loss_percent: float = Field(default=2.0, ge=0.1, le=50, description="止损百分比")
     is_active: bool = Field(default=True, description="是否启用交易")
 
