@@ -386,6 +386,73 @@ class BinanceAPI:
             params["symbol"] = symbol
         return await self._request("GET", "/fapi/v1/openOrders", params, signed=True)
     
+    async def get_24hr_ticker(self, symbol: str = None) -> List[dict]:
+        """获取24小时价格变化统计
+        
+        Args:
+            symbol: 交易对，如果不传则返回所有交易对
+        
+        Returns:
+            List[dict]: 包含以下字段的列表:
+                - symbol: 交易对
+                - priceChange: 价格变化
+                - priceChangePercent: 价格变化百分比
+                - lastPrice: 最新价格
+                - highPrice: 24小时最高价
+                - lowPrice: 24小时最低价
+                - volume: 24小时成交量
+                - quoteVolume: 24小时成交额
+        """
+        params = {}
+        if symbol:
+            params["symbol"] = symbol
+        result = await self._request("GET", "/fapi/v1/ticker/24hr", params)
+        # 如果是单个symbol，返回的是dict，转为list
+        if isinstance(result, dict):
+            return [result]
+        return result
+    
+    async def get_high_change_symbols(self, min_change_percent: float = 30.0) -> List[dict]:
+        """获取24小时涨跌幅绝对值大于指定百分比的币种
+        
+        Args:
+            min_change_percent: 最小涨跌幅绝对值（百分比），默认30
+        
+        Returns:
+            List[dict]: 符合条件的币种列表，按涨跌幅绝对值降序排列
+                包含字段: symbol, priceChangePercent, lastPrice, volume, quoteVolume
+        """
+        all_tickers = await self.get_24hr_ticker()
+        
+        # 筛选USDT永续合约且涨跌幅绝对值 >= min_change_percent 的币种
+        high_change = []
+        for ticker in all_tickers:
+            symbol = ticker.get("symbol", "")
+            # 只看USDT永续合约
+            if not symbol.endswith("USDT"):
+                continue
+            
+            try:
+                change_percent = float(ticker.get("priceChangePercent", 0))
+                if abs(change_percent) >= min_change_percent:
+                    high_change.append({
+                        "symbol": symbol,
+                        "priceChangePercent": change_percent,
+                        "lastPrice": float(ticker.get("lastPrice", 0)),
+                        "highPrice": float(ticker.get("highPrice", 0)),
+                        "lowPrice": float(ticker.get("lowPrice", 0)),
+                        "volume": float(ticker.get("volume", 0)),
+                        "quoteVolume": float(ticker.get("quoteVolume", 0)),
+                    })
+            except (ValueError, TypeError):
+                continue
+        
+        # 按涨跌幅绝对值降序排列
+        high_change.sort(key=lambda x: abs(x["priceChangePercent"]), reverse=True)
+        
+        logger.info(f"找到 {len(high_change)} 个涨跌幅绝对值 >= {min_change_percent}% 的币种")
+        return high_change
+    
     async def calculate_order_quantity(self, symbol: str, leverage: int, 
                                         position_percent: float = None) -> float:
         """计算下单数量

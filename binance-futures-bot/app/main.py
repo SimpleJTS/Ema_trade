@@ -318,9 +318,8 @@ async def lifespan(app: FastAPI):
     # 启动移动止损管理器
     await trailing_stop_manager.start()
     
-    # 启动TG OI频道监控（如果配置了）
-    if settings.TG_API_ID and settings.TG_API_HASH:
-        oi_monitor.start()  # 使用独立线程，不阻塞主程序
+    # 启动24小时涨跌幅监控（无需TG配置，直接调用币安API）
+    await oi_monitor.start(check_interval=300)  # 每5分钟检查一次
     
     # 发送启动通知
     await telegram_service.send_message("🚀 **Binance Futures Bot 已启动**")
@@ -335,7 +334,7 @@ async def lifespan(app: FastAPI):
     await trailing_stop_manager.stop()
     await trading_engine.stop()
     await binance_ws.stop()
-    oi_monitor.stop()  # 停止OI监控线程
+    await oi_monitor.stop()  # 停止涨跌幅监控
     await binance_api.close()
     
     await telegram_service.send_message("🛑 **Binance Futures Bot 已停止**")
