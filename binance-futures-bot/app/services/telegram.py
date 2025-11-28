@@ -114,10 +114,9 @@ class TelegramChannelListener:
             return False
         
         try:
-            from telethon import TelegramClient
+            from telethon import TelegramClient, events
             import os
             
-            # session文件路径: /app/data/tgsession.session
             session_path = '/app/data/tgsession'
             session_file = session_path + '.session'
             
@@ -125,14 +124,7 @@ class TelegramChannelListener:
                 logger.error(f"Telethon session文件不存在: {session_file}")
                 return False
             
-            logger.info(f"使用 session 文件: {session_file}")
-            self._client = TelegramClient(
-                session_path,
-                settings.TG_API_ID,
-                settings.TG_API_HASH
-            )
-            
-            # 只连接，不尝试交互式登录
+            self._client = TelegramClient(session_path, settings.TG_API_ID, settings.TG_API_HASH)
             await self._client.connect()
             
             if not await self._client.is_user_authorized():
@@ -140,7 +132,46 @@ class TelegramChannelListener:
                 await self._client.disconnect()
                 return False
             
-            logger.info("Telethon 客户端已启动")
+            # 在初始化时就注册事件处理器，而不是在监听循环中注册
+            channel = settings.TG_CHANNEL
+            if channel.startswith('https://t.me/'):
+                channel = channel.replace('https://t.me/', '@')
+            
+            try:
+                entity = await self._client.get_entity(channel)
+                logger.info(f"正在初始化频道监听: {channel} (ID: {entity.id})")
+            except Exception as e:
+                logger.error(f"获取频道实体失败: {e}")
+                await self._client.disconnect()
+                return False
+            
+            # 保存引用供事件处理器使用
+            listener = self
+            
+            # 定义事件处理器
+            @self._client.on(events.NewMessage(chats=entity))
+            async def message_handler(event):
+                try:
+                    text = event.message.text or ""
+                    if not text:  # 跳过没有文本内容的消息
+                        return
+                    
+                    logger.info(f"[TG频道] 收到新消息，长度: {len(text)}")
+                    logger.info(f"[TG频道] 消息预览: {text[:200]}...")
+                    
+                    results = listener.parse_message(text)
+                    
+                    if results:
+                        logger.info(f"[TG频道] 解析到 {len(results)} 个符合条件的交易对: {results}")
+                        for symbol, change_percent in results:
+                            await listener._notify_callbacks(symbol, change_percent)
+                    else:
+                        logger.info(f"[TG频道] 消息中未发现符合条件的交易对")
+                        
+                except Exception as e:
+                    logger.error(f"消息处理异常: {e}", exc_info=True)
+            
+            logger.info("事件处理器已在初始化时注册")
             return True
             
         except Exception as e:
@@ -260,31 +291,23 @@ class TelegramChannelListener:
             return
         
         if not await self.initialize():
+            logger.error("频道监听器初始化失败，无法启动监听")
             return
         
         self._running = True
-        self._listen_task = asyncio.create_task(self._listen_loop())
-        logger.info("频道监听器已启动")
+        logger.info("频道监听器已启动，等待新消息...")
+        # 不需要再创建额外的监听任务，因为事件处理器已经在初始化时注册了
     
     async def stop(self):
         """停止监听"""
         self._running = False
         
-        # 先断开客户端连接，这会让 run_until_disconnected() 返回
         if self._client:
             try:
                 await self._client.disconnect()
                 logger.info("Telethon 客户端已断开连接")
             except Exception as e:
                 logger.error(f"断开 Telethon 连接时出错: {e}")
-        
-        # 然后取消监听任务
-        if self._listen_task:
-            self._listen_task.cancel()
-            try:
-                await self._listen_task
-            except asyncio.CancelledError:
-                pass
         
         logger.info("频道监听器已停止")
 
