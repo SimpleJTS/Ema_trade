@@ -16,9 +16,21 @@ class TradingPair(Base):
     symbol: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
     leverage: Mapped[int] = mapped_column(Integer, default=10)
     strategy_interval: Mapped[str] = mapped_column(String(10), default="1m")  # K线周期
+    strategy_type: Mapped[str] = mapped_column(String(20), default="EMA_BASIC")  # EMA_BASIC(6/51) or EMA_ADVANCED(9/72/200)
     stop_loss_percent: Mapped[float] = mapped_column(Float, default=2.0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_amplitude_disabled: Mapped[bool] = mapped_column(Boolean, default=False)  # 振幅禁用标记
+
+    # 杠杆策略相关
+    market_cap_usd: Mapped[float] = mapped_column(Float, nullable=True)  # 市值（USD）
+    market_cap_tier: Mapped[int] = mapped_column(Integer, nullable=True)  # 市值层级 1-4
+    base_leverage: Mapped[int] = mapped_column(Integer, nullable=True)  # 基础杠杆
+    current_leverage: Mapped[int] = mapped_column(Integer, nullable=True)  # 当前杠杆（动态调整后）
+
+    # 波动率相关
+    atr_volatility: Mapped[float] = mapped_column(Float, nullable=True)  # ATR年化波动率(%)
+    last_volatility_check: Mapped[datetime] = mapped_column(DateTime, nullable=True)  # 最后波动率检查时间
+
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -28,9 +40,16 @@ class TradingPair(Base):
             "symbol": self.symbol,
             "leverage": self.leverage,
             "strategy_interval": self.strategy_interval,
+            "strategy_type": self.strategy_type,
             "stop_loss_percent": self.stop_loss_percent,
             "is_active": self.is_active,
             "is_amplitude_disabled": self.is_amplitude_disabled,
+            "market_cap_usd": self.market_cap_usd,
+            "market_cap_tier": self.market_cap_tier,
+            "base_leverage": self.base_leverage,
+            "current_leverage": self.current_leverage,
+            "atr_volatility": self.atr_volatility,
+            "last_volatility_check": self.last_volatility_check.isoformat() if self.last_volatility_check else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None
         }
@@ -62,6 +81,12 @@ class Position(Base):
     take_profit_price: Mapped[float] = mapped_column(Float, nullable=True)
     current_stop_level: Mapped[int] = mapped_column(Integer, default=0)  # 当前止损级别
     is_trailing_active: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # 部分平仓相关
+    is_partial_closed: Mapped[bool] = mapped_column(Boolean, default=False)  # 是否已部分平仓
+    partial_close_quantity: Mapped[float] = mapped_column(Float, nullable=True)  # 部分平仓数量
+    remaining_quantity: Mapped[float] = mapped_column(Float, nullable=True)  # 剩余数量
+
     status: Mapped[str] = mapped_column(String(20), default="OPEN")  # OPEN/CLOSED
     pnl: Mapped[float] = mapped_column(Float, nullable=True)
     pnl_percent: Mapped[float] = mapped_column(Float, nullable=True)
@@ -81,6 +106,9 @@ class Position(Base):
             "stop_loss_order_id": self.stop_loss_order_id,
             "current_stop_level": self.current_stop_level,
             "is_trailing_active": self.is_trailing_active,
+            "is_partial_closed": self.is_partial_closed,
+            "partial_close_quantity": self.partial_close_quantity,
+            "remaining_quantity": self.remaining_quantity,
             "status": self.status,
             "pnl": self.pnl,
             "pnl_percent": self.pnl_percent,
