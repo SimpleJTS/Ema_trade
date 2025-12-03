@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交易策略配置器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        /* 策略列表样式 */
+        .strategy-list {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        .strategy-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .strategy-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .strategy-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .strategy-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .strategy-desc {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .strategy-item.active .strategy-desc {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .strategy-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status-inactive {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #9e9e9e;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .ema-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        /* 条件配置器样式 */
+        .conditions-section {
+            margin-top: 30px;
+        }
+
+        .condition-item {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .condition-item.enabled {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .condition-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .condition-title {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .condition-toggle {
+            width: 50px;
+            height: 26px;
+            background: #ccc;
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .condition-toggle.active {
+            background: #4caf50;
+        }
+
+        .condition-toggle::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+
+        .condition-toggle.active::after {
+            left: 26px;
+        }
+
+        .condition-params {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .param-input {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .param-input label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .param-input input,
+        .param-input select {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        /* 操作按钮组 */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+        }
+
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 新建策略按钮 */
+        .new-strategy-btn {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .strategy-list {
+                max-height: 400px;
+            }
+        }
+
+        /* 消息提示 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.success {
+            border-left: 4px solid #4caf50;
+        }
+
+        .toast.error {
+            border-left: 4px solid #f44336;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 交易策略配置器</h1>
+
+        <div class="main-content">
+            <!-- 左侧：策略列表 -->
+            <div class="card">
+                <button class="btn btn-primary new-strategy-btn" onclick="createNewStrategy()">
+                    ➕ 新建策略
+                </button>
+                <h2>策略列表</h2>
+                <div id="strategyList" class="strategy-list">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        加载中...
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：策略编辑器 -->
+            <div class="card">
+                <div id="editorContent">
+                    <div style="text-align: center; padding: 60px 20px; color: #999;">
+                        <div style="font-size: 3em; margin-bottom: 20px;">📝</div>
+                        <p style="font-size: 1.2em;">请从左侧选择或创建一个策略</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 消息提示 -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let currentStrategy = null;
+        let conditionDefinitions = {};
+
+        // 显示提示消息
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 加载条件定义
+        async function loadConditionDefinitions() {
+            try {
+                const response = await fetch(`${API_BASE}/api/conditions/definitions`);
+                const result = await response.json();
+                if (result.success) {
+                    conditionDefinitions = result.data;
+                }
+            } catch (error) {
+                console.error('加载条件定义失败:', error);
+            }
+        }
+
+        // 加载策略列表
+        async function loadStrategies() {
+            try {
+                const response = await fetch(`${API_BASE}/api/strategies`);
+                const result = await response.json();
+
+                if (result.success) {
+                    renderStrategyList(result.data);
+                } else {
+                    document.getElementById('strategyList').innerHTML = `
+                        <div style="text-align: center; color: #f44336;">
+                            加载失败: ${result.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('加载策略列表失败:', error);
+                document.getElementById('strategyList').innerHTML = `
+                    <div style="text-align: center; color: #f44336;">
+                        网络错误，请检查API服务
+                    </div>
+                `;
+            }
+        }
+
+        // 渲染策略列表
+        function renderStrategyList(strategies) {
+            const listDiv = document.getElementById('strategyList');
+
+            if (strategies.length === 0) {
+                listDiv.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #999;">
+                        暂无策略，点击上方按钮创建
+                    </div>
+                `;
+                return;
+            }
+
+            listDiv.innerHTML = strategies.map(s => `
+                <div class="strategy-item ${s.is_active ? 'active' : ''}"
+                     onclick="loadStrategy(${s.id})">
+                    <div class="strategy-name">${s.name}</div>
+                    <div class="strategy-desc">${s.description || '无描述'}</div>
+                    <span class="strategy-status ${s.is_active ? 'status-active' : 'status-inactive'}">
+                        ${s.is_active ? '✓ 已激活' : '未激活'}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        // 加载策略详情
+        async function loadStrategy(strategyId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/strategies/${strategyId}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    currentStrategy = result.data;
+                    renderStrategyEditor(result.data);
+                } else {
+                    showToast('加载策略失败: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('加载策略失败:', error);
+                showToast('网络错误', 'error');
+            }
+        }
+
+        // 渲染策略编辑器
+        function renderStrategyEditor(strategy) {
+            const conditions = strategy.entry_conditions || [];
+            const conditionsHtml = Object.keys(conditionDefinitions).map(condType => {
+                const def = conditionDefinitions[condType];
+                const existingCond = conditions.find(c => c.type === condType);
+                const enabled = existingCond?.enabled || false;
+                const params = existingCond || {};
+
+                return `
+                    <div class="condition-item ${enabled ? 'enabled' : ''}" data-type="${condType}">
+                        <div class="condition-header">
+                            <div>
+                                <div class="condition-title">${def.name}</div>
+                                <div style="font-size: 0.9em; color: #666;">${def.description}</div>
+                            </div>
+                            <div class="condition-toggle ${enabled ? 'active' : ''}"
+                                 onclick="toggleCondition('${condType}')"></div>
+                        </div>
+                        <div class="condition-params" id="params-${condType}">
+                            ${renderConditionParams(condType, def.params, params)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('editorContent').innerHTML = `
+                <h2>编辑策略: ${strategy.name}</h2>
+
+                <div class="form-group">
+                    <label>策略名称</label>
+                    <input type="text" id="strategyName" value="${strategy.name}" />
+                </div>
+
+                <div class="form-group">
+                    <label>策略描述</label>
+                    <textarea id="strategyDesc" rows="3">${strategy.description || ''}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>EMA 参数配置</label>
+                    <div class="ema-grid">
+                        <div>
+                            <label style="font-size: 0.9em; color: #666;">快线周期</label>
+                            <input type="number" id="emaFast" value="${strategy.ema_fast}" min="1" max="100" />
+                        </div>
+                        <div>
+                            <label style="font-size: 0.9em; color: #666;">中线周期</label>
+                            <input type="number" id="emaMedium" value="${strategy.ema_medium || 72}" min="1" max="200" />
+                        </div>
+                        <div>
+                            <label style="font-size: 0.9em; color: #666;">慢线周期</label>
+                            <input type="number" id="emaSlow" value="${strategy.ema_slow || 200}" min="1" max="500" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="conditions-section">
+                    <h2>入场条件配置</h2>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        选择并配置入场条件，所有启用的条件必须同时满足才会开仓
+                    </p>
+                    ${conditionsHtml}
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="saveStrategy()">💾 保存策略</button>
+                    <button class="btn btn-primary" onclick="activateStrategy(${strategy.id})">
+                        ${strategy.is_active ? '✓ 已激活' : '🚀 激活策略'}
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteStrategy(${strategy.id})">🗑️ 删除</button>
+                </div>
+            `;
+        }
+
+        // 渲染条件参数
+        function renderConditionParams(condType, paramDefs, currentParams) {
+            if (!paramDefs) return '';
+
+            return Object.entries(paramDefs).map(([paramName, paramDef]) => {
+                const value = currentParams[paramName] !== undefined ? currentParams[paramName] : paramDef.default;
+
+                if (paramDef.type === 'select') {
+                    const options = paramDef.options.map(opt =>
+                        `<option value="${opt}" ${value === opt ? 'selected' : ''}>${opt}</option>`
+                    ).join('');
+                    return `
+                        <div class="param-input">
+                            <label>${paramDef.label}</label>
+                            <select data-param="${paramName}">${options}</select>
+                        </div>
+                    `;
+                } else if (paramDef.type === 'number') {
+                    return `
+                        <div class="param-input">
+                            <label>${paramDef.label}</label>
+                            <input type="number" data-param="${paramName}"
+                                   value="${value}"
+                                   min="${paramDef.min || 0}"
+                                   max="${paramDef.max || 1000}"
+                                   step="${paramDef.step || 1}" />
+                        </div>
+                    `;
+                } else if (paramDef.type === 'boolean') {
+                    return `
+                        <div class="param-input">
+                            <label>${paramDef.label}</label>
+                            <input type="checkbox" data-param="${paramName}"
+                                   ${value ? 'checked' : ''} />
+                        </div>
+                    `;
+                }
+                return '';
+            }).join('');
+        }
+
+        // 切换条件启用状态
+        function toggleCondition(condType) {
+            const item = document.querySelector(`.condition-item[data-type="${condType}"]`);
+            const toggle = item.querySelector('.condition-toggle');
+            const isEnabled = toggle.classList.contains('active');
+
+            if (isEnabled) {
+                toggle.classList.remove('active');
+                item.classList.remove('enabled');
+            } else {
+                toggle.classList.add('active');
+                item.classList.add('enabled');
+            }
+        }
+
+        // 收集策略配置
+        function collectStrategyConfig() {
+            const conditions = [];
+
+            document.querySelectorAll('.condition-item').forEach(item => {
+                const condType = item.dataset.type;
+                const enabled = item.classList.contains('enabled');
+
+                if (enabled) {
+                    const condition = { type: condType, enabled: true };
+
+                    // 收集参数
+                    item.querySelectorAll('[data-param]').forEach(input => {
+                        const paramName = input.dataset.param;
+                        if (input.type === 'checkbox') {
+                            condition[paramName] = input.checked;
+                        } else if (input.type === 'number') {
+                            condition[paramName] = parseFloat(input.value);
+                        } else {
+                            condition[paramName] = input.value;
+                        }
+                    });
+
+                    conditions.push(condition);
+                }
+            });
+
+            return {
+                name: document.getElementById('strategyName').value,
+                description: document.getElementById('strategyDesc').value,
+                ema_fast: parseInt(document.getElementById('emaFast').value),
+                ema_medium: parseInt(document.getElementById('emaMedium').value),
+                ema_slow: parseInt(document.getElementById('emaSlow').value),
+                entry_conditions: conditions
+            };
+        }
+
+        // 保存策略
+        async function saveStrategy() {
+            if (!currentStrategy) return;
+
+            const config = collectStrategyConfig();
+
+            try {
+                const response = await fetch(`${API_BASE}/api/strategies/${currentStrategy.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast('策略保存成功', 'success');
+                    loadStrategies();
+                    loadStrategy(currentStrategy.id);
+                } else {
+                    showToast('保存失败: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('保存策略失败:', error);
+                showToast('网络错误', 'error');
+            }
+        }
+
+        // 激活策略
+        async function activateStrategy(strategyId) {
+            if (!confirm('确定要激活此策略吗？这将停用其他所有策略。')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/strategies/${strategyId}/activate`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast('策略已激活', 'success');
+                    loadStrategies();
+                    loadStrategy(strategyId);
+                } else {
+                    showToast('激活失败: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('激活策略失败:', error);
+                showToast('网络错误', 'error');
+            }
+        }
+
+        // 删除策略
+        async function deleteStrategy(strategyId) {
+            if (!confirm('确定要删除此策略吗？此操作不可恢复。')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/strategies/${strategyId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast('策略已删除', 'success');
+                    currentStrategy = null;
+                    document.getElementById('editorContent').innerHTML = `
+                        <div style="text-align: center; padding: 60px 20px; color: #999;">
+                            <div style="font-size: 3em; margin-bottom: 20px;">📝</div>
+                            <p style="font-size: 1.2em;">请从左侧选择或创建一个策略</p>
+                        </div>
+                    `;
+                    loadStrategies();
+                } else {
+                    showToast('删除失败: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('删除策略失败:', error);
+                showToast('网络错误', 'error');
+            }
+        }
+
+        // 创建新策略
+        async function createNewStrategy() {
+            const name = prompt('请输入策略名称:');
+            if (!name) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/strategies`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        description: '新创建的策略',
+                        ema_fast: 9,
+                        ema_medium: 72,
+                        ema_slow: 200,
+                        entry_conditions: []
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast('策略创建成功', 'success');
+                    loadStrategies();
+                    loadStrategy(result.data.id);
+                } else {
+                    showToast('创建失败: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('创建策略失败:', error);
+                showToast('网络错误', 'error');
+            }
+        }
+
+        // 初始化
+        async function init() {
+            await loadConditionDefinitions();
+            await loadStrategies();
+        }
+
+        init();
+    </script>
+</body>
+</html>

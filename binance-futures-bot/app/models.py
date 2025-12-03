@@ -201,3 +201,45 @@ class KlineCache(Base):
         # 复合索引
         {"sqlite_autoincrement": True},
     )
+
+
+class StrategyConfig(Base):
+    """策略配置表 - 支持灵活的条件组合"""
+    __tablename__ = "strategy_configs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100), unique=True)  # 策略名称
+    description: Mapped[str] = mapped_column(Text, nullable=True)  # 策略描述
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False)  # 是否启用
+
+    # EMA参数
+    ema_fast: Mapped[int] = mapped_column(Integer, default=9)  # 快线周期
+    ema_medium: Mapped[int] = mapped_column(Integer, nullable=True)  # 中线周期
+    ema_slow: Mapped[int] = mapped_column(Integer, nullable=True)  # 慢线周期
+
+    # 入场条件配置（JSON格式）
+    # 示例: [
+    #   {"type": "ema_cross", "enabled": true, "direction": "golden"},
+    #   {"type": "price_above_ema", "enabled": true, "ema_type": "slow"},
+    #   {"type": "adx_threshold", "enabled": true, "period": 14, "threshold": 25},
+    #   {"type": "volume_surge", "enabled": true, "period": 30, "multiplier": 1.8},
+    #   {"type": "cross_count_limit", "enabled": true, "lookback": 25, "max_crosses": 1}
+    # ]
+    entry_conditions: Mapped[dict] = mapped_column(JSON, default=dict)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "is_active": self.is_active,
+            "ema_fast": self.ema_fast,
+            "ema_medium": self.ema_medium,
+            "ema_slow": self.ema_slow,
+            "entry_conditions": self.entry_conditions,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None
+        }
