@@ -27,6 +27,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 复制应用代码
 COPY app/ ./app/
 
+# 复制数据库迁移脚本
+COPY migrations/ ./migrations/
+
 # 创建数据和日志目录
 RUN mkdir -p /app/data /app/logs
 
