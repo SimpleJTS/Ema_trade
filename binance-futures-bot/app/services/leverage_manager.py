@@ -63,9 +63,9 @@ class LeverageManager:
     ) -> Dict:
         """计算动态杠杆（策略3：波动率+趋势强度综合策略）
 
-        基础杠杆: 8x
-        最低杠杆: 8x
-        最高杠杆: 20x
+        基础杠杆: 10x
+        最低杠杆: 10x
+        最高杠杆: 25x
 
         波动率调整系数:
         - ATR < 70%  → 系数 1.5 (低波动，提升杠杆)
@@ -77,7 +77,7 @@ class LeverageManager:
         - ADX 25-35 → 系数 1.15 (强趋势)
         - ADX < 25  → 系数 1.0 (弱趋势，保持最低杠杆)
 
-        最终杠杆 = 基础杠杆 × 波动率系数 × 趋势系数 (限制在8-20x)
+        最终杠杆 = 基础杠杆 × 波动率系数 × 趋势系数 (限制在10-25x)
 
         Args:
             symbol: 交易对
@@ -97,7 +97,7 @@ class LeverageManager:
             }
         """
         # 基础杠杆
-        base_leverage = 8
+        base_leverage = 10
 
         # 计算技术指标
         if klines and len(klines) >= 200:
@@ -139,8 +139,8 @@ class LeverageManager:
         # 3. 计算最终杠杆
         final_leverage = base_leverage * vol_factor * trend_factor
 
-        # 4. 限制在8-20x范围内
-        final_leverage = max(8, min(20, int(final_leverage)))
+        # 4. 限制在10-25x范围内
+        final_leverage = max(10, min(25, int(final_leverage)))
 
         # 5. 生成调整原因
         adjustment_reason = f"{vol_desc}, {trend_desc} → 系数{vol_factor}×{trend_factor}={vol_factor*trend_factor:.2f}"
