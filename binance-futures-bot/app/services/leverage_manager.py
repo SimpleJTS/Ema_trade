@@ -84,16 +84,16 @@ class LeverageManager:
         # 1. 获取市值信息
         market_data = await coingecko_api.get_coin_market_data(symbol)
         if not market_data:
-            logger.warning(f"[{symbol}] 无法获取市值数据，使用默认保守杠杆5x")
+            logger.warning(f"[{symbol}] 无法获取市值数据，使用默认杠杆10x")
             return {
-                "leverage": 5,
-                "base_leverage": 5,
+                "leverage": 10,
+                "base_leverage": 10,
                 "market_cap_usd": 0,
                 "market_cap_tier": 4,
                 "tier_name": "未知",
                 "volatility": 0,
                 "adx": 0,
-                "adjustment_reason": "市值数据不可用，使用保守杠杆"
+                "adjustment_reason": "市值数据不可用，使用默认杠杆10x"
             }
 
         market_cap_usd = market_data["market_cap_usd"]
