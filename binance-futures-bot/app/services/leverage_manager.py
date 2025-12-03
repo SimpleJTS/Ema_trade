@@ -61,7 +61,23 @@ class LeverageManager:
         volatility: Optional[float] = None,
         adx: Optional[float] = None
     ) -> Dict:
-        """计算杠杆（当前禁用动态调整，固定返回10x）
+        """计算动态杠杆（策略3：波动率+趋势强度综合策略）
+
+        基础杠杆: 8x
+        最低杠杆: 8x
+        最高杠杆: 20x
+
+        波动率调整系数:
+        - ATR < 70%  → 系数 1.5 (低波动，提升杠杆)
+        - ATR 70-120% → 系数 1.0 (正常波动)
+        - ATR > 120% → 系数 1.0 (高波动，保持最低杠杆)
+
+        趋势强度调整系数:
+        - ADX > 35  → 系数 1.3 (超强趋势)
+        - ADX 25-35 → 系数 1.15 (强趋势)
+        - ADX < 25  → 系数 1.0 (弱趋势，保持最低杠杆)
+
+        最终杠杆 = 基础杠杆 × 波动率系数 × 趋势系数 (限制在8-20x)
 
         Args:
             symbol: 交易对
@@ -71,17 +87,19 @@ class LeverageManager:
 
         Returns:
             {
-                "leverage": int,  # 固定10x
-                "base_leverage": int,
-                "market_cap_usd": float,
-                "market_cap_tier": int,
-                "tier_name": str,
-                "volatility": float,
-                "adx": float,
-                "adjustment_reason": str
+                "leverage": int,  # 最终杠杆
+                "base_leverage": int,  # 基础杠杆
+                "volatility": float,  # 波动率
+                "adx": float,  # ADX值
+                "vol_factor": float,  # 波动率系数
+                "trend_factor": float,  # 趋势系数
+                "adjustment_reason": str  # 调整原因
             }
         """
-        # 计算技术指标（用于记录和后续分析）
+        # 基础杠杆
+        base_leverage = 8
+
+        # 计算技术指标
         if klines and len(klines) >= 200:
             if volatility is None:
                 volatility = technical_indicators.calculate_atr_volatility(klines, period=14)
@@ -92,20 +110,54 @@ class LeverageManager:
             volatility = volatility or 0
             adx = adx or 0
 
-        # 固定杠杆10x（动态调整已禁用）
-        fixed_leverage = 10
+        # 1. 计算波动率系数
+        if volatility > 0:
+            if volatility < 70:
+                vol_factor = 1.5  # 低波动，提升杠杆
+                vol_desc = f"低波动({volatility:.1f}%<70%)"
+            elif volatility <= 120:
+                vol_factor = 1.0  # 正常波动
+                vol_desc = f"正常波动({volatility:.1f}%)"
+            else:
+                vol_factor = 1.0  # 高波动，保持最低杠杆
+                vol_desc = f"高波动({volatility:.1f}%>120%)"
+        else:
+            vol_factor = 1.0
+            vol_desc = "波动率未知"
 
-        logger.info(f"[{symbol}] 固定杠杆: {fixed_leverage}x (波动率={volatility:.1f}%, ADX={adx:.1f})")
+        # 2. 计算趋势强度系数
+        if adx > 35:
+            trend_factor = 1.3  # 超强趋势
+            trend_desc = f"超强趋势(ADX={adx:.1f}>35)"
+        elif adx >= 25:
+            trend_factor = 1.15  # 强趋势
+            trend_desc = f"强趋势(ADX={adx:.1f}≥25)"
+        else:
+            trend_factor = 1.0  # 弱趋势，保持最低杠杆
+            trend_desc = f"弱趋势(ADX={adx:.1f}<25)"
+
+        # 3. 计算最终杠杆
+        final_leverage = base_leverage * vol_factor * trend_factor
+
+        # 4. 限制在8-20x范围内
+        final_leverage = max(8, min(20, int(final_leverage)))
+
+        # 5. 生成调整原因
+        adjustment_reason = f"{vol_desc}, {trend_desc} → 系数{vol_factor}×{trend_factor}={vol_factor*trend_factor:.2f}"
+
+        logger.info(f"[{symbol}] 动态杠杆: {final_leverage}x (基础{base_leverage}x, {adjustment_reason})")
 
         return {
-            "leverage": fixed_leverage,
-            "base_leverage": fixed_leverage,
+            "leverage": final_leverage,
+            "base_leverage": base_leverage,
             "market_cap_usd": 0,
             "market_cap_tier": 0,
-            "tier_name": "固定杠杆模式",
+            "tier_name": "综合策略",
             "volatility": volatility,
             "adx": adx,
-            "adjustment_reason": f"固定杠杆{fixed_leverage}x (波动率={volatility:.1f}%, ADX={adx:.1f})"
+            "vol_factor": vol_factor,
+            "trend_factor": trend_factor,
+            "adjustment_reason": adjustment_reason
         }
 
 
