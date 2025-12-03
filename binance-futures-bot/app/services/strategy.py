@@ -245,5 +245,234 @@ class EMAStrategy:
         return round(amplitude, 2)
 
 
+class EMAAdvancedStrategy:
+    """EMA高级交叉策略（EMA9/EMA72/EMA200 + ADX + 成交量）
+
+    规则:
+    做多信号（5个条件全满足才开仓）：
+    1. EMA9 上穿 EMA72 且收盘价 > EMA72
+    2. 收盘价 > EMA200
+    3. ADX(14) ≥ 25
+    4. 当前成交量 ≥ 30周期均量 × 1.8
+    5. 前25根K线内仅发生 ≤1 次EMA9/EMA72交叉（最好0次）
+
+    做空信号（5个条件全满足才开仓）：
+    1. EMA9 下穿 EMA72 且收盘价 < EMA72
+    2. 收盘价 < EMA200
+    3. ADX(14) ≥ 25
+    4. 当前成交量 ≥ 30周期均量 × 1.8
+    5. 前25根K线内仅发生 ≤1 次EMA9/EMA72交叉（最好0次）
+    """
+
+    def __init__(self, ema_fast: int = 9, ema_medium: int = 72, ema_slow: int = 200,
+                 adx_period: int = 14, adx_threshold: float = 25,
+                 volume_period: int = 30, volume_multiplier: float = 1.8,
+                 lookback: int = 25, max_crosses: int = 1):
+        self.ema_fast = ema_fast
+        self.ema_medium = ema_medium
+        self.ema_slow = ema_slow
+        self.adx_period = adx_period
+        self.adx_threshold = adx_threshold
+        self.volume_period = volume_period
+        self.volume_multiplier = volume_multiplier
+        self.lookback = lookback
+        self.max_crosses = max_crosses
+
+    @staticmethod
+    def calculate_ema(prices: List[float], period: int) -> List[float]:
+        """计算EMA（复用基础策略的方法）"""
+        return EMAStrategy.calculate_ema(prices, period)
+
+    def detect_cross(self, ema_fast: List[float], ema_medium: List[float],
+                     index: int) -> Optional[str]:
+        """检测EMA9和EMA72的交叉"""
+        if index < 1 or index >= len(ema_fast) or index >= len(ema_medium):
+            return None
+
+        # 当前状态
+        fast_above_now = ema_fast[index] > ema_medium[index]
+        # 前一状态
+        fast_above_prev = ema_fast[index - 1] > ema_medium[index - 1]
+
+        # 检测交叉
+        if fast_above_now and not fast_above_prev:
+            return "GOLDEN"  # 金叉
+        elif not fast_above_now and fast_above_prev:
+            return "DEATH"  # 死叉
+
+        return None
+
+    def count_crosses(self, ema_fast: List[float], ema_medium: List[float],
+                      end_index: int, lookback: int = None) -> int:
+        """统计EMA9和EMA72交叉次数"""
+        if lookback is None:
+            lookback = self.lookback
+
+        start_index = max(1, end_index - lookback)
+        cross_count = 0
+
+        for i in range(start_index, end_index):
+            if self.detect_cross(ema_fast, ema_medium, i):
+                cross_count += 1
+
+        return cross_count
+
+    def analyze(self, symbol: str, klines: List[dict]) -> StrategySignal:
+        """分析K线数据生成信号
+
+        Args:
+            symbol: 交易对
+            klines: K线数据列表
+
+        Returns:
+            StrategySignal
+        """
+        # 导入技术指标
+        from app.utils.indicators import technical_indicators
+
+        # 至少需要 ema_slow + lookback + adx_period + 2 根K线
+        min_klines = self.ema_slow + self.lookback + self.adx_period + 2
+        if len(klines) < min_klines:
+            return StrategySignal(
+                signal_type=SignalType.NONE,
+                symbol=symbol,
+                price=0,
+                ema_fast=0,
+                ema_slow=0,
+                cross_count=0,
+                message=f"K线数据不足: {len(klines)} < {min_klines}"
+            )
+
+        # 提取收盘价
+        close_prices = [float(k[4]) for k in klines]
+
+        # 计算EMA9, EMA72, EMA200
+        ema9 = self.calculate_ema(close_prices, self.ema_fast)
+        ema72 = self.calculate_ema(close_prices, self.ema_medium)
+        ema200 = self.calculate_ema(close_prices, self.ema_slow)
+
+        # 当前K线索引
+        current_index = len(close_prices) - 1
+        current_price = close_prices[current_index]
+        current_ema9 = ema9[current_index] if ema9 else 0
+        current_ema72 = ema72[current_index] if ema72 else 0
+        current_ema200 = ema200[current_index] if ema200 else 0
+
+        # 条件1: 检测当前K线是否有EMA9/EMA72交叉
+        cross_type = self.detect_cross(ema9, ema72, current_index)
+        if not cross_type:
+            return StrategySignal(
+                signal_type=SignalType.NONE,
+                symbol=symbol,
+                price=current_price,
+                ema_fast=current_ema9,
+                ema_slow=current_ema72,
+                cross_count=0,
+                message="无EMA交叉信号"
+            )
+
+        # 条件2: 检查收盘价与EMA200的关系
+        if cross_type == "GOLDEN" and current_price <= current_ema200:
+            return StrategySignal(
+                signal_type=SignalType.NONE,
+                symbol=symbol,
+                price=current_price,
+                ema_fast=current_ema9,
+                ema_slow=current_ema72,
+                cross_count=0,
+                message=f"金叉但收盘价({current_price:.6f}) <= EMA200({current_ema200:.6f})，不满足做多条件"
+            )
+
+        if cross_type == "DEATH" and current_price >= current_ema200:
+            return StrategySignal(
+                signal_type=SignalType.NONE,
+                symbol=symbol,
+                price=current_price,
+                ema_fast=current_ema9,
+                ema_slow=current_ema72,
+                cross_count=0,
+                message=f"死叉但收盘价({current_price:.6f}) >= EMA200({current_ema200:.6f})，不满足做空条件"
+            )
+
+        # 条件3: 计算ADX并检查是否≥25
+        adx_values, plus_di, minus_di = technical_indicators.calculate_adx(klines, self.adx_period)
+        if not adx_values or len(adx_values) == 0:
+            return StrategySignal(
+                signal_type=SignalType.NONE,
+                symbol=symbol,
+                price=current_price,
+                ema_fast=current_ema9,
+                ema_slow=current_ema72,
+                cross_count=0,
+                message="ADX计算失败"
+            )
+
+        current_adx = adx_values[-1]
+        if current_adx < self.adx_threshold:
+            return StrategySignal(
+                signal_type=SignalType.NONE,
+                symbol=symbol,
+                price=current_price,
+                ema_fast=current_ema9,
+                ema_slow=current_ema72,
+                cross_count=0,
+                message=f"ADX({current_adx:.2f}) < {self.adx_threshold}，趋势不够强"
+            )
+
+        # 条件4: 检查成交量是否突破
+        volume_ok = technical_indicators.check_volume_surge(
+            klines, self.volume_period, self.volume_multiplier
+        )
+        if not volume_ok:
+            current_volume = float(klines[-1][5])
+            volume_ma_list = technical_indicators.calculate_volume_average(klines, self.volume_period)
+            avg_volume = volume_ma_list[-1] if volume_ma_list else 0
+            return StrategySignal(
+                signal_type=SignalType.NONE,
+                symbol=symbol,
+                price=current_price,
+                ema_fast=current_ema9,
+                ema_slow=current_ema72,
+                cross_count=0,
+                message=f"成交量不足: {current_volume:.0f} < {avg_volume * self.volume_multiplier:.0f} ({self.volume_multiplier}x均量)"
+            )
+
+        # 条件5: 统计前N根K线的交叉次数
+        cross_count = self.count_crosses(ema9, ema72, current_index)
+        if cross_count > self.max_crosses:
+            return StrategySignal(
+                signal_type=SignalType.NONE,
+                symbol=symbol,
+                price=current_price,
+                ema_fast=current_ema9,
+                ema_slow=current_ema72,
+                cross_count=cross_count,
+                message=f"前{self.lookback}根K线交叉过于频繁({cross_count}次 > {self.max_crosses}次)，震荡行情不开仓"
+            )
+
+        # 所有条件满足，生成信号
+        if cross_type == "GOLDEN":
+            return StrategySignal(
+                signal_type=SignalType.LONG,
+                symbol=symbol,
+                price=current_price,
+                ema_fast=current_ema9,
+                ema_slow=current_ema72,
+                cross_count=cross_count,
+                message=f"做多信号! EMA{self.ema_fast}上穿EMA{self.ema_medium}, 价格>{self.ema_slow}, ADX={current_adx:.2f}, 成交量突破, 前{self.lookback}根交叉{cross_count}次"
+            )
+        else:  # DEATH
+            return StrategySignal(
+                signal_type=SignalType.SHORT,
+                symbol=symbol,
+                price=current_price,
+                ema_fast=current_ema9,
+                ema_slow=current_ema72,
+                cross_count=cross_count,
+                message=f"做空信号! EMA{self.ema_fast}下穿EMA{self.ema_medium}, 价格<{self.ema_slow}, ADX={current_adx:.2f}, 成交量突破, 前{self.lookback}根交叉{cross_count}次"
+            )
+
+
 # 全局策略实例
-ema_strategy = EMAStrategy()
+ema_strategy = EMAStrategy()  # 基础策略（EMA6/EMA51）
+ema_advanced_strategy = EMAAdvancedStrategy()  # 高级策略（EMA9/EMA72/EMA200）

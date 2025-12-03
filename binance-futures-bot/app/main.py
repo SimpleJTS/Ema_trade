@@ -19,7 +19,7 @@ from app.models import TradingPair, SystemConfig
 from app.api.routes import router as api_router
 from app.services.binance_api import binance_api
 from app.services.binance_ws import binance_ws, KlineData
-from app.services.strategy import ema_strategy, SignalType
+from app.services.strategy import ema_strategy, ema_advanced_strategy, SignalType
 from app.services.position_manager import position_manager
 from app.services.trailing_stop import trailing_stop_manager
 from app.services.telegram import telegram_service
@@ -89,9 +89,16 @@ class TradingEngine:
             # 检查是否已有仓位
             if await position_manager.has_position(symbol):
                 return
-            
+
+            # 根据策略类型选择策略
+            strategy_type = pair.strategy_type if hasattr(pair, 'strategy_type') else "EMA_BASIC"
+            if strategy_type == "EMA_ADVANCED":
+                strategy = ema_advanced_strategy
+            else:
+                strategy = ema_strategy
+
             # 运行策略
-            signal = ema_strategy.analyze(symbol, self._kline_cache[symbol])
+            signal = strategy.analyze(symbol, self._kline_cache[symbol])
             
             if signal.signal_type == SignalType.NONE:
                 logger.debug(f"{symbol}: {signal.message}")

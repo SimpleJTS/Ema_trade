@@ -19,11 +19,11 @@ from app.models import Position, StopLossLog, SystemConfig
 logger = logging.getLogger(__name__)
 
 
-# 默认止损配置
+# 默认止损配置（新版4级止损）
 DEFAULT_TRAILING_CONFIG = {
-    "level_1": {"profit_min": 2.5, "profit_max": 5.0, "lock_profit": 0, "trailing_enabled": False, "trailing_percent": 3.0},
-    "level_2": {"profit_min": 5.0, "profit_max": 10.0, "lock_profit": 3.0, "trailing_enabled": False, "trailing_percent": 3.0},
-    "level_3": {"profit_min": 10.0, "profit_max": None, "lock_profit": 5.0, "trailing_enabled": True, "trailing_percent": 3.0}
+    "level_1": {"profit_min": 1.8, "profit_max": 2.5, "lock_profit": 0.1, "trailing_enabled": False, "trailing_percent": 0},
+    "level_2": {"profit_min": 2.5, "profit_max": 4.0, "lock_profit": 1.9, "trailing_enabled": False, "trailing_percent": 0},
+    "level_3": {"profit_min": 4.0, "profit_max": None, "lock_profit": 1.9, "trailing_enabled": True, "trailing_percent": 1.5, "partial_close_percent": 50.0}
 }
 
 
@@ -88,15 +88,15 @@ class TrailingStopManager:
     
     async def check_trailing_stop(self, position: Position, current_price: float):
         """检查并更新移动止损
-        
+
         Args:
             position: 仓位对象
             current_price: 当前价格
         """
         symbol = position.symbol
         profit_percent = self.calculate_profit_percent(position, current_price)
-        
-        logger.debug(f"[{symbol}] 当前盈亏: {profit_percent:.2f}%, 现价: {current_price}")
+
+        logger.debug(f"[{symbol}] 当前盈亏: {profit_percent:.2f}%, 现价: {current_price}, 部分平仓状态: {position.is_partial_closed}")
         
         # 更新最高/最低价格
         if position.side == "LONG":
@@ -164,8 +164,22 @@ class TrailingStopManager:
             adjust_detail = f"当前价格变动{profit_percent:.2f}%（触发阈值{l2_min}%），锁定{l2_lock}%价格利润，止损价设为{new_stop_price:.6f}"
             logger.info(f"[{symbol}] 触发级别2: 价格变动{profit_percent:.2f}%，锁定{l2_lock}%利润，止损价 {new_stop_price}")
         
-        # 级别3: 追踪止损
+        # 级别3: 追踪止损 + 部分平仓
         elif profit_percent >= l3_min and current_level < 3:
+            # 检查是否需要部分平仓
+            partial_close_percent = level_3_cfg.get("partial_close_percent", 50.0)
+
+            # 如果尚未部分平仓，先执行部分平仓
+            if not position.is_partial_closed:
+                logger.info(f"[{symbol}] 触发级别3: 盈利{profit_percent:.2f}% >= {l3_min}%，执行{partial_close_percent}%部分平仓")
+                try:
+                    # 执行部分平仓
+                    await self._partial_close_position(position, partial_close_percent, current_price)
+                except Exception as e:
+                    logger.error(f"[{symbol}] 部分平仓失败: {e}")
+                    # 即使部分平仓失败，仍然继续设置止损
+
+            # 设置剩余仓位的止损（基于剩余数量）
             if position.side == "LONG":
                 new_stop_price = position.entry_price * (1 + l3_lock / 100)
             else:
@@ -173,10 +187,10 @@ class TrailingStopManager:
             new_level = 3
             is_trailing = l3_trailing
             locked_profit = l3_lock
-            trailing_desc = f"并启动追踪止损模式（回撤{l3_trailing_pct}%触发）" if l3_trailing else ""
-            adjust_reason = f"{'启动追踪止损' if l3_trailing else '锁定利润'} - 锁定{l3_lock}%价格收益"
-            adjust_detail = f"当前价格变动{profit_percent:.2f}%（触发阈值{l3_min}%），锁定{l3_lock}%价格利润{trailing_desc}，止损价设为{new_stop_price:.6f}"
-            logger.info(f"[{symbol}] 触发级别3: 价格变动{profit_percent:.2f}%，锁定{l3_lock}%利润{'并启动追踪止损' if l3_trailing else ''}，止损价 {new_stop_price}")
+            trailing_desc = f"并启动{l3_trailing_pct}%追踪止损模式" if l3_trailing else ""
+            adjust_reason = f"部分平仓{partial_close_percent}% + {'启动追踪止损' if l3_trailing else '锁定利润'}"
+            adjust_detail = f"当前价格变动{profit_percent:.2f}%（触发阈值{l3_min}%），已平仓{partial_close_percent}%，剩余仓位锁定{l3_lock}%利润{trailing_desc}，止损价设为{new_stop_price:.6f}"
+            logger.info(f"[{symbol}] 触发级别3: 价格变动{profit_percent:.2f}%，部分平仓{partial_close_percent}%{'并启动追踪止损' if l3_trailing else ''}，止损价 {new_stop_price}")
         
         # 追踪止损逻辑
         if is_trailing and current_level >= 3:
@@ -230,6 +244,25 @@ class TrailingStopManager:
                 is_trailing=is_trailing
             )
     
+    async def _partial_close_position(self, position: Position, close_percent: float, current_price: float):
+        """执行部分平仓
+
+        Args:
+            position: 仓位对象
+            close_percent: 平仓百分比（如50表示平仓50%）
+            current_price: 当前价格
+        """
+        if position.is_partial_closed:
+            logger.warning(f"[{position.symbol}] 已经执行过部分平仓，跳过")
+            return
+
+        # 调用 position_manager 的部分平仓方法
+        await position_manager.partial_close_position(
+            symbol=position.symbol,
+            close_percent=close_percent,
+            current_price=current_price
+        )
+
     async def _log_stop_loss_adjustment(
         self,
         position: Position,

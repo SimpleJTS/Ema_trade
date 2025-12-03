@@ -203,9 +203,120 @@ class PositionManager:
         finally:
             await session.close()
     
+    async def partial_close_position(self, symbol: str, close_percent: float, current_price: float) -> bool:
+        """部分平仓
+
+        Args:
+            symbol: 交易对
+            close_percent: 平仓百分比（如50表示平仓50%）
+            current_price: 当前价格
+
+        Returns:
+            True表示成功
+        """
+        session = await DatabaseManager.get_session()
+        try:
+            position = self._positions.get(symbol)
+            if not position:
+                logger.warning(f"[{symbol}] 未找到持仓，无法部分平仓")
+                return False
+
+            if position.is_partial_closed:
+                logger.warning(f"[{symbol}] 已经执行过部分平仓，跳过")
+                return False
+
+            # 计算平仓数量
+            close_quantity = position.quantity * (close_percent / 100.0)
+            remaining_quantity = position.quantity - close_quantity
+
+            logger.info(f"[{symbol}] 部分平仓: 总数量={position.quantity}, 平仓{close_percent}%={close_quantity}, 剩余={remaining_quantity}")
+
+            # 平仓方向
+            close_side = "SELL" if position.side == "LONG" else "BUY"
+
+            # 下市价平仓单
+            order_result = await binance_api.place_market_order(
+                symbol=symbol,
+                side=close_side,
+                quantity=close_quantity,
+                reduce_only=True
+            )
+
+            # 计算部分平仓的盈亏
+            if position.side == "LONG":
+                partial_pnl = (current_price - position.entry_price) * close_quantity
+                partial_pnl_percent = ((current_price - position.entry_price) / position.entry_price) * 100 * position.leverage
+            else:
+                partial_pnl = (position.entry_price - current_price) * close_quantity
+                partial_pnl_percent = ((position.entry_price - current_price) / position.entry_price) * 100 * position.leverage
+
+            # 更新仓位记录
+            await session.execute(
+                update(Position)
+                .where(Position.id == position.id)
+                .values(
+                    is_partial_closed=True,
+                    partial_close_quantity=close_quantity,
+                    remaining_quantity=remaining_quantity,
+                    quantity=remaining_quantity  # 更新当前持仓数量为剩余数量
+                )
+            )
+            await session.commit()
+
+            # 更新缓存
+            position.is_partial_closed = True
+            position.partial_close_quantity = close_quantity
+            position.remaining_quantity = remaining_quantity
+            position.quantity = remaining_quantity
+
+            # 记录交易日志
+            trade_log = TradeLog(
+                symbol=symbol,
+                action="PARTIAL_CLOSE",
+                price=current_price,
+                quantity=close_quantity,
+                order_id=str(order_result.get("orderId", "")),
+                message=f"部分平仓{close_percent}%: 价格={format_price_full(current_price)}, 数量={close_quantity}, 盈亏={format_price_full(partial_pnl)} USDT ({partial_pnl_percent:.2f}%)",
+                extra_data={
+                    "entry_price": position.entry_price,
+                    "close_percent": close_percent,
+                    "remaining_quantity": remaining_quantity,
+                    "partial_pnl": partial_pnl,
+                    "partial_pnl_percent": partial_pnl_percent
+                }
+            )
+            session.add(trade_log)
+            await session.commit()
+
+            # TG通知
+            emoji = "🟢" if partial_pnl >= 0 else "🔴"
+            msg = (
+                f"{emoji} **部分平仓通知**\n"
+                f"交易对: {symbol}\n"
+                f"方向: {'做多' if position.side == 'LONG' else '做空'}\n"
+                f"平仓比例: {close_percent}%\n"
+                f"平仓数量: {close_quantity}\n"
+                f"剩余数量: {remaining_quantity}\n"
+                f"入场价: {format_price_full(position.entry_price)}\n"
+                f"平仓价: {format_price_full(current_price)}\n"
+                f"部分盈亏: {format_price_full(partial_pnl)} USDT ({partial_pnl_percent:.2f}%)"
+            )
+            await telegram_service.send_message(msg)
+
+            logger.info(f"[{symbol}] 部分平仓成功: 平仓{close_percent}%，盈亏{partial_pnl:.2f} USDT")
+            return True
+
+        except Exception as e:
+            logger.error(f"[{symbol}] 部分平仓失败: {e}")
+            await session.rollback()
+            await telegram_service.send_message(f"❌ 部分平仓失败: {symbol}\n错误: {str(e)}")
+            return False
+        finally:
+            await session.close()
+
     async def close_position(self, symbol: str, reason: str = "SIGNAL") -> bool:
         """平仓
-        
+
         Args:
             symbol: 交易对
             reason: 平仓原因 (SIGNAL/STOP_LOSS/TRAILING_STOP/MANUAL)
