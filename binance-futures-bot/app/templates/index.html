@@ -530,36 +530,44 @@
                 </div>
             </div>
 
-            <!-- 统计卡片 -->
+            <!-- 核心统计卡片 -->
             <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
                 <div class="stat-card">
-                    <div class="stat-label">总交易次数</div>
+                    <div class="stat-label">净盈亏</div>
+                    <div class="stat-value" id="pnl-net">0 USDT</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">已实现盈亏</div>
+                    <div class="stat-value" id="pnl-realized">0 USDT</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">手续费</div>
+                    <div class="stat-value negative" id="pnl-commission">0 USDT</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">资金费率</div>
+                    <div class="stat-value" id="pnl-funding">0 USDT</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">交易次数</div>
                     <div class="stat-value" id="pnl-total-trades">0</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">胜率</div>
                     <div class="stat-value" id="pnl-win-rate">0%</div>
                 </div>
+            </div>
+
+            <!-- 更多统计信息 -->
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
                 <div class="stat-card">
                     <div class="stat-label">盈亏比</div>
                     <div class="stat-value" id="pnl-profit-factor">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">总盈亏</div>
-                    <div class="stat-value" id="pnl-total">0 USDT</div>
-                </div>
-                <div class="stat-card">
                     <div class="stat-label">盈利 / 亏损</div>
                     <div class="stat-value" id="pnl-win-loss">0 / 0</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">平均持仓时间</div>
-                    <div class="stat-value" id="pnl-avg-time">0 分钟</div>
-                </div>
-            </div>
-
-            <!-- 更多统计信息 -->
-            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
                 <div class="stat-card">
                     <div class="stat-label">平均盈利</div>
                     <div class="stat-value positive" id="pnl-avg-win">0 USDT</div>
@@ -567,14 +575,6 @@
                 <div class="stat-card">
                     <div class="stat-label">平均亏损</div>
                     <div class="stat-value negative" id="pnl-avg-loss">0 USDT</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">最大单笔盈利</div>
-                    <div class="stat-value positive" id="pnl-max-win">0 USDT</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">最大单笔亏损</div>
-                    <div class="stat-value negative" id="pnl-max-loss">0 USDT</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">最大连胜</div>
@@ -596,28 +596,46 @@
                 </div>
             </div>
 
-            <!-- 交易记录表 -->
+            <!-- 按交易对统计 -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">交易记录</h2>
+                    <h2 class="card-title">按交易对统计</h2>
+                </div>
+                <div class="table-container" style="max-height: 300px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>交易对</th>
+                                <th>已实现盈亏</th>
+                                <th>手续费</th>
+                                <th>资金费</th>
+                                <th>净盈亏</th>
+                                <th>交易次数</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pnl-symbol-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 收益记录 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">收益记录</h2>
                     <span id="pnl-record-count" style="color: var(--text-secondary); font-size: 0.875rem;"></span>
                 </div>
                 <div class="table-container" style="max-height: 400px; overflow-y: auto;">
                     <table>
                         <thead>
                             <tr>
-                                <th>平仓时间</th>
+                                <th>时间</th>
                                 <th>交易对</th>
-                                <th>方向</th>
-                                <th>杠杆</th>
-                                <th>入场价</th>
-                                <th>数量</th>
-                                <th>盈亏</th>
-                                <th>盈亏%</th>
-                                <th>平仓原因</th>
+                                <th>类型</th>
+                                <th>金额</th>
+                                <th>备注</th>
                             </tr>
                         </thead>
-                        <tbody id="pnl-trades-table"></tbody>
+                        <tbody id="pnl-records-table"></tbody>
                     </table>
                 </div>
             </div>
@@ -1541,7 +1559,8 @@
                 const data = await apiCall(url);
                 updatePnLStats(data.summary);
                 updatePnLChart(data.curve_data);
-                updatePnLTable(data.trades);
+                updatePnLSymbolTable(data.by_symbol);
+                updatePnLRecordsTable(data.records);
             } catch (e) {
                 showToast(e.message, 'error');
             }
@@ -1549,32 +1568,46 @@
 
         // 更新统计数据
         function updatePnLStats(summary) {
+            // 净盈亏
+            const netPnlEl = document.getElementById('pnl-net');
+            netPnlEl.textContent = (summary.net_pnl >= 0 ? '+' : '') + summary.net_pnl.toFixed(2) + ' USDT';
+            netPnlEl.className = 'stat-value ' + (summary.net_pnl >= 0 ? 'positive' : 'negative');
+
+            // 已实现盈亏
+            const realizedEl = document.getElementById('pnl-realized');
+            realizedEl.textContent = (summary.realized_pnl >= 0 ? '+' : '') + summary.realized_pnl.toFixed(2) + ' USDT';
+            realizedEl.className = 'stat-value ' + (summary.realized_pnl >= 0 ? 'positive' : 'negative');
+
+            // 手续费
+            document.getElementById('pnl-commission').textContent = '-' + summary.commission.toFixed(2) + ' USDT';
+
+            // 资金费率
+            const fundingEl = document.getElementById('pnl-funding');
+            fundingEl.textContent = (summary.funding_fee >= 0 ? '+' : '') + summary.funding_fee.toFixed(2) + ' USDT';
+            fundingEl.className = 'stat-value ' + (summary.funding_fee >= 0 ? 'positive' : 'negative');
+
+            // 交易次数
             document.getElementById('pnl-total-trades').textContent = summary.total_trades;
 
+            // 胜率
             const winRateEl = document.getElementById('pnl-win-rate');
             winRateEl.textContent = summary.win_rate.toFixed(1) + '%';
             winRateEl.className = 'stat-value ' + (summary.win_rate >= 50 ? 'positive' : 'negative');
 
+            // 盈亏比
             const profitFactorEl = document.getElementById('pnl-profit-factor');
             profitFactorEl.textContent = summary.profit_factor >= 999 ? '∞' : summary.profit_factor.toFixed(2);
             profitFactorEl.className = 'stat-value ' + (summary.profit_factor >= 1 ? 'positive' : 'negative');
 
-            const totalPnlEl = document.getElementById('pnl-total');
-            totalPnlEl.textContent = (summary.total_pnl >= 0 ? '+' : '') + summary.total_pnl.toFixed(2) + ' USDT';
-            totalPnlEl.className = 'stat-value ' + (summary.total_pnl >= 0 ? 'positive' : 'negative');
-
+            // 盈利/亏损次数
             document.getElementById('pnl-win-loss').innerHTML =
                 `<span class="positive">${summary.winning_trades}</span> / <span class="negative">${summary.losing_trades}</span>`;
 
-            document.getElementById('pnl-avg-time').textContent =
-                summary.avg_holding_time_minutes < 60
-                    ? summary.avg_holding_time_minutes.toFixed(0) + ' 分钟'
-                    : (summary.avg_holding_time_minutes / 60).toFixed(1) + ' 小时';
-
+            // 平均盈亏
             document.getElementById('pnl-avg-win').textContent = '+' + summary.avg_win.toFixed(2) + ' USDT';
             document.getElementById('pnl-avg-loss').textContent = summary.avg_loss.toFixed(2) + ' USDT';
-            document.getElementById('pnl-max-win').textContent = '+' + summary.max_win.toFixed(2) + ' USDT';
-            document.getElementById('pnl-max-loss').textContent = summary.max_loss.toFixed(2) + ' USDT';
+
+            // 连胜连亏
             document.getElementById('pnl-max-wins').textContent = summary.max_consecutive_wins;
             document.getElementById('pnl-max-losses').textContent = summary.max_consecutive_losses;
         }
@@ -1707,40 +1740,74 @@
             });
         }
 
-        // 更新交易记录表
-        function updatePnLTable(trades) {
-            const tbody = document.getElementById('pnl-trades-table');
-            document.getElementById('pnl-record-count').textContent = `共 ${trades.length} 条记录`;
+        // 更新按交易对统计表格
+        function updatePnLSymbolTable(bySymbol) {
+            const tbody = document.getElementById('pnl-symbol-table');
 
-            if (trades.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary)">暂无交易记录</td></tr>';
+            if (!bySymbol || bySymbol.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-secondary)">暂无数据</td></tr>';
                 return;
             }
 
-            // 按平仓时间倒序显示
-            const sortedTrades = [...trades].reverse();
-
-            tbody.innerHTML = sortedTrades.map(trade => {
-                const pnlClass = (trade.pnl || 0) >= 0 ? 'positive' : 'negative';
-                const pnlSign = (trade.pnl || 0) >= 0 ? '+' : '';
-                const closeReasonText = {
-                    'SIGNAL': '信号平仓',
-                    'STOP_LOSS': '止损',
-                    'TRAILING_STOP': '移动止损',
-                    'MANUAL': '手动平仓'
-                }[trade.close_reason] || trade.close_reason || '-';
+            tbody.innerHTML = bySymbol.map(item => {
+                const realizedClass = item.realized_pnl >= 0 ? 'positive' : 'negative';
+                const netClass = item.net_pnl >= 0 ? 'positive' : 'negative';
+                const fundingClass = item.funding_fee >= 0 ? 'positive' : 'negative';
 
                 return `
                     <tr>
-                        <td style="white-space: nowrap;">${trade.closed_at ? new Date(trade.closed_at).toLocaleString('zh-CN', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}) : '-'}</td>
-                        <td><strong>${trade.symbol}</strong></td>
-                        <td><span class="badge ${trade.side === 'LONG' ? 'badge-success' : 'badge-danger'}">${trade.side === 'LONG' ? '多' : '空'}</span></td>
-                        <td>${trade.leverage}x</td>
-                        <td>${trade.entry_price.toFixed(6)}</td>
-                        <td>${trade.quantity.toFixed(4)}</td>
-                        <td class="${pnlClass}">${pnlSign}${(trade.pnl || 0).toFixed(2)}</td>
-                        <td class="${pnlClass}">${pnlSign}${(trade.pnl_percent || 0).toFixed(2)}%</td>
-                        <td><span class="badge badge-info">${closeReasonText}</span></td>
+                        <td><strong>${item.symbol}</strong></td>
+                        <td class="${realizedClass}">${item.realized_pnl >= 0 ? '+' : ''}${item.realized_pnl.toFixed(2)}</td>
+                        <td class="negative">-${item.commission.toFixed(2)}</td>
+                        <td class="${fundingClass}">${item.funding_fee >= 0 ? '+' : ''}${item.funding_fee.toFixed(2)}</td>
+                        <td class="${netClass}"><strong>${item.net_pnl >= 0 ? '+' : ''}${item.net_pnl.toFixed(2)}</strong></td>
+                        <td>${item.trade_count}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 更新收益记录表
+        function updatePnLRecordsTable(records) {
+            const tbody = document.getElementById('pnl-records-table');
+            document.getElementById('pnl-record-count').textContent = `共 ${records.length} 条记录`;
+
+            if (!records || records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-secondary)">暂无记录</td></tr>';
+                return;
+            }
+
+            // 按时间倒序显示
+            const sortedRecords = [...records].reverse();
+
+            const incomeTypeText = {
+                'REALIZED_PNL': '已实现盈亏',
+                'COMMISSION': '手续费',
+                'FUNDING_FEE': '资金费率',
+                'TRANSFER': '划转',
+                'WELCOME_BONUS': '欢迎奖励',
+                'REFERRAL_KICKBACK': '推荐返佣',
+                'INSURANCE_CLEAR': '保险清算'
+            };
+
+            const incomeTypeBadge = {
+                'REALIZED_PNL': 'badge-info',
+                'COMMISSION': 'badge-warning',
+                'FUNDING_FEE': 'badge-success'
+            };
+
+            tbody.innerHTML = sortedRecords.map(record => {
+                const incomeClass = record.income >= 0 ? 'positive' : 'negative';
+                const typeText = incomeTypeText[record.income_type] || record.income_type;
+                const badgeClass = incomeTypeBadge[record.income_type] || 'badge';
+
+                return `
+                    <tr>
+                        <td style="white-space: nowrap;">${new Date(record.timestamp).toLocaleString('zh-CN', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit'})}</td>
+                        <td><strong>${record.symbol || '-'}</strong></td>
+                        <td><span class="badge ${badgeClass}">${typeText}</span></td>
+                        <td class="${incomeClass}">${record.income >= 0 ? '+' : ''}${record.income.toFixed(4)}</td>
+                        <td style="color: var(--text-secondary); font-size: 0.8rem;">${record.info || '-'}</td>
                     </tr>
                 `;
             }).join('');

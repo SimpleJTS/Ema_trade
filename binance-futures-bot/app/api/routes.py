@@ -16,7 +16,7 @@ from app.api.schemas import (
     MessageResponse, ErrorResponse,
     TrailingStopConfig, TrailingStopConfigUpdate, TrailingStopLevel,
     TGMonitorConfig, TGMonitorConfigUpdate,
-    PnLAnalysisResponse, PnLSummary, PnLCurvePoint, PnLTradeRecord
+    PnLAnalysisResponse, PnLSummary, PnLCurvePoint, PnLIncomeRecord, PnLBySymbol
 )
 from app.config import settings, config_manager
 from app.services.binance_api import binance_api
@@ -590,10 +590,10 @@ async def get_pnl_analysis(
     end_date: Optional[str] = Query(None, description="结束日期 (YYYY-MM-DD)"),
     symbol: Optional[str] = Query(None, description="交易对筛选")
 ):
-    """获取PnL分析数据"""
+    """获取PnL分析数据（从币安API获取真实交易数据）"""
     from datetime import datetime, timedelta
+    from collections import defaultdict
 
-    session = await DatabaseManager.get_session()
     try:
         # 解析日期范围
         if start_date:
@@ -604,38 +604,77 @@ async def get_pnl_analysis(
         if end_date:
             period_end = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)
         else:
-            period_end = datetime.utcnow() + timedelta(days=1)
+            period_end = datetime.utcnow()
 
-        # 构建查询 - 只查询已关闭的仓位
-        query = select(Position).where(
-            Position.status == "CLOSED",
-            Position.closed_at >= period_start,
-            Position.closed_at < period_end
-        ).order_by(Position.closed_at.asc())
+        # 转换为毫秒时间戳
+        start_ts = int(period_start.timestamp() * 1000)
+        end_ts = int(period_end.timestamp() * 1000)
 
-        if symbol:
-            query = query.where(Position.symbol == symbol.upper())
+        # 从币安API获取收益历史
+        income_data = await binance_api.get_all_income_history(
+            symbol=symbol.upper() if symbol else None,
+            start_time=start_ts,
+            end_time=end_ts
+        )
 
-        result = await session.execute(query)
-        positions = result.scalars().all()
+        # 分类统计
+        realized_pnl_records = []  # 已实现盈亏
+        commission_total = 0.0
+        funding_fee_total = 0.0
+        symbol_stats = defaultdict(lambda: {
+            "realized_pnl": 0.0,
+            "commission": 0.0,
+            "funding_fee": 0.0,
+            "trade_count": 0
+        })
+
+        # 处理每条收益记录
+        all_records = []
+        for record in income_data:
+            income = float(record.get("income", 0))
+            income_type = record.get("incomeType", "")
+            sym = record.get("symbol", "")
+            timestamp = datetime.fromtimestamp(record.get("time", 0) / 1000)
+
+            all_records.append(PnLIncomeRecord(
+                symbol=sym,
+                income_type=income_type,
+                income=income,
+                asset=record.get("asset", "USDT"),
+                timestamp=timestamp,
+                info=record.get("info"),
+                tran_id=record.get("tranId"),
+                trade_id=record.get("tradeId")
+            ))
+
+            if income_type == "REALIZED_PNL":
+                realized_pnl_records.append(income)
+                symbol_stats[sym]["realized_pnl"] += income
+                symbol_stats[sym]["trade_count"] += 1
+            elif income_type == "COMMISSION":
+                commission_total += abs(income)
+                symbol_stats[sym]["commission"] += abs(income)
+            elif income_type == "FUNDING_FEE":
+                funding_fee_total += income
+                symbol_stats[sym]["funding_fee"] += income
 
         # 计算统计数据
-        total_trades = len(positions)
-        winning_trades = sum(1 for p in positions if (p.pnl or 0) > 0)
-        losing_trades = sum(1 for p in positions if (p.pnl or 0) < 0)
+        total_trades = len(realized_pnl_records)
+        winning_trades = sum(1 for p in realized_pnl_records if p > 0)
+        losing_trades = sum(1 for p in realized_pnl_records if p < 0)
 
-        total_pnl = sum(p.pnl or 0 for p in positions)
-        total_pnl_percent = sum(p.pnl_percent or 0 for p in positions)
+        total_realized_pnl = sum(realized_pnl_records)
+        net_pnl = total_realized_pnl - commission_total + funding_fee_total
 
-        wins = [p.pnl for p in positions if (p.pnl or 0) > 0]
-        losses = [p.pnl for p in positions if (p.pnl or 0) < 0]
+        wins = [p for p in realized_pnl_records if p > 0]
+        losses = [p for p in realized_pnl_records if p < 0]
 
         avg_win = sum(wins) / len(wins) if wins else 0
         avg_loss = sum(losses) / len(losses) if losses else 0
 
         total_win_amount = sum(wins) if wins else 0
         total_loss_amount = abs(sum(losses)) if losses else 0
-        profit_factor = total_win_amount / total_loss_amount if total_loss_amount > 0 else float('inf') if total_win_amount > 0 else 0
+        profit_factor = total_win_amount / total_loss_amount if total_loss_amount > 0 else (999.99 if total_win_amount > 0 else 0)
 
         max_win = max(wins) if wins else 0
         max_loss = min(losses) if losses else 0
@@ -646,8 +685,7 @@ async def get_pnl_analysis(
         current_wins = 0
         current_losses = 0
 
-        for p in positions:
-            pnl = p.pnl or 0
+        for pnl in realized_pnl_records:
             if pnl > 0:
                 current_wins += 1
                 current_losses = 0
@@ -660,39 +698,38 @@ async def get_pnl_analysis(
                 current_wins = 0
                 current_losses = 0
 
-        # 计算平均持仓时间
-        holding_times = []
-        for p in positions:
-            if p.opened_at and p.closed_at:
-                delta = (p.closed_at - p.opened_at).total_seconds() / 60
-                holding_times.append(delta)
-        avg_holding_time = sum(holding_times) / len(holding_times) if holding_times else 0
-
-        # 构建PnL曲线数据
+        # 构建PnL曲线数据（按时间顺序累计净盈亏）
         curve_data = []
         cumulative_pnl = 0
-        for i, p in enumerate(positions):
-            cumulative_pnl += p.pnl or 0
+        pnl_count = 0
+        for record in all_records:
+            if record.income_type == "REALIZED_PNL":
+                cumulative_pnl += record.income
+                pnl_count += 1
+            elif record.income_type == "COMMISSION":
+                cumulative_pnl -= abs(record.income)
+            elif record.income_type == "FUNDING_FEE":
+                cumulative_pnl += record.income
+
             curve_data.append(PnLCurvePoint(
-                timestamp=p.closed_at or datetime.utcnow(),
+                timestamp=record.timestamp,
                 cumulative_pnl=round(cumulative_pnl, 2),
-                trade_count=i + 1
+                trade_count=pnl_count
             ))
 
-        # 构建交易记录
-        trades = [PnLTradeRecord(
-            id=p.id,
-            symbol=p.symbol,
-            side=p.side,
-            entry_price=p.entry_price,
-            quantity=p.quantity,
-            leverage=p.leverage,
-            pnl=p.pnl,
-            pnl_percent=p.pnl_percent,
-            opened_at=p.opened_at,
-            closed_at=p.closed_at,
-            close_reason=p.close_reason
-        ) for p in positions]
+        # 按交易对统计
+        by_symbol = [
+            PnLBySymbol(
+                symbol=sym,
+                realized_pnl=round(stats["realized_pnl"], 2),
+                commission=round(stats["commission"], 2),
+                funding_fee=round(stats["funding_fee"], 2),
+                net_pnl=round(stats["realized_pnl"] - stats["commission"] + stats["funding_fee"], 2),
+                trade_count=stats["trade_count"]
+            )
+            for sym, stats in sorted(symbol_stats.items(), key=lambda x: x[1]["realized_pnl"], reverse=True)
+            if sym  # 过滤空symbol
+        ]
 
         # 构建摘要
         summary = PnLSummary(
@@ -700,38 +737,56 @@ async def get_pnl_analysis(
             winning_trades=winning_trades,
             losing_trades=losing_trades,
             win_rate=round((winning_trades / total_trades * 100) if total_trades > 0 else 0, 2),
-            total_pnl=round(total_pnl, 2),
-            total_pnl_percent=round(total_pnl_percent, 2),
+            realized_pnl=round(total_realized_pnl, 2),
+            commission=round(commission_total, 2),
+            funding_fee=round(funding_fee_total, 2),
+            net_pnl=round(net_pnl, 2),
             avg_win=round(avg_win, 2),
             avg_loss=round(avg_loss, 2),
-            profit_factor=round(profit_factor, 2) if profit_factor != float('inf') else 999.99,
+            profit_factor=round(min(profit_factor, 999.99), 2),
             max_win=round(max_win, 2),
             max_loss=round(max_loss, 2),
             max_consecutive_wins=max_consecutive_wins,
-            max_consecutive_losses=max_consecutive_losses,
-            avg_holding_time_minutes=round(avg_holding_time, 1)
+            max_consecutive_losses=max_consecutive_losses
         )
 
         return PnLAnalysisResponse(
             summary=summary,
             curve_data=curve_data,
-            trades=trades,
+            by_symbol=by_symbol,
+            records=all_records[-500:],  # 只返回最近500条记录
             period_start=period_start,
             period_end=period_end
         )
-    finally:
-        await session.close()
+    except Exception as e:
+        logger.error(f"获取PnL分析数据失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/pnl/symbols")
 async def get_pnl_symbols():
-    """获取有交易记录的交易对列表"""
-    session = await DatabaseManager.get_session()
+    """获取有交易记录的交易对列表（从币安API获取）"""
+    from datetime import datetime, timedelta
+
     try:
-        result = await session.execute(
-            select(Position.symbol).where(Position.status == "CLOSED").distinct()
+        # 获取最近90天的数据
+        end_ts = int(datetime.utcnow().timestamp() * 1000)
+        start_ts = int((datetime.utcnow() - timedelta(days=90)).timestamp() * 1000)
+
+        income_data = await binance_api.get_all_income_history(
+            income_type="REALIZED_PNL",
+            start_time=start_ts,
+            end_time=end_ts
         )
-        symbols = [row[0] for row in result.fetchall()]
-        return {"symbols": sorted(symbols)}
-    finally:
-        await session.close()
+
+        # 提取唯一的交易对
+        symbols = set()
+        for record in income_data:
+            sym = record.get("symbol", "")
+            if sym:
+                symbols.add(sym)
+
+        return {"symbols": sorted(list(symbols))}
+    except Exception as e:
+        logger.error(f"获取交易对列表失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
