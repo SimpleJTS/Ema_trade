@@ -215,8 +215,62 @@ class TGMonitorConfig(BaseModel):
 class TGMonitorConfigUpdate(BaseModel):
     """更新TG频道监控配置"""
     min_price_change_percent: float = Field(
-        ..., 
-        ge=1.0, 
-        le=100.0, 
+        ...,
+        ge=1.0,
+        le=100.0,
         description="24H价格变化阈值（绝对值）"
     )
+
+
+# ========== PnL Analysis Schemas ==========
+
+class PnLTradeRecord(BaseModel):
+    """单笔交易记录"""
+    id: int
+    symbol: str
+    side: str
+    entry_price: float
+    quantity: float
+    leverage: int
+    pnl: Optional[float]
+    pnl_percent: Optional[float]
+    opened_at: Optional[datetime]
+    closed_at: Optional[datetime]
+    close_reason: Optional[str]
+
+    class Config:
+        from_attributes = True
+
+
+class PnLSummary(BaseModel):
+    """PnL统计摘要"""
+    total_trades: int = Field(description="总交易次数")
+    winning_trades: int = Field(description="盈利交易次数")
+    losing_trades: int = Field(description="亏损交易次数")
+    win_rate: float = Field(description="胜率 (%)")
+    total_pnl: float = Field(description="总盈亏 (USDT)")
+    total_pnl_percent: float = Field(description="总盈亏百分比")
+    avg_win: float = Field(description="平均盈利 (USDT)")
+    avg_loss: float = Field(description="平均亏损 (USDT)")
+    profit_factor: float = Field(description="盈亏比 (总盈利/总亏损)")
+    max_win: float = Field(description="最大单笔盈利 (USDT)")
+    max_loss: float = Field(description="最大单笔亏损 (USDT)")
+    max_consecutive_wins: int = Field(description="最大连胜次数")
+    max_consecutive_losses: int = Field(description="最大连亏次数")
+    avg_holding_time_minutes: float = Field(description="平均持仓时间 (分钟)")
+
+
+class PnLCurvePoint(BaseModel):
+    """PnL曲线数据点"""
+    timestamp: datetime
+    cumulative_pnl: float
+    trade_count: int
+
+
+class PnLAnalysisResponse(BaseModel):
+    """PnL分析完整响应"""
+    summary: PnLSummary
+    curve_data: List[PnLCurvePoint]
+    trades: List[PnLTradeRecord]
+    period_start: datetime
+    period_end: datetime
