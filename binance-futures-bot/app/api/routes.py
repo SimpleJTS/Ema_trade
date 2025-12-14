@@ -15,7 +15,8 @@ from app.api.schemas import (
     PositionResponse, WebSocketStatus, TradeLogResponse, StopLossLogResponse,
     MessageResponse, ErrorResponse,
     TrailingStopConfig, TrailingStopConfigUpdate, TrailingStopLevel,
-    TGMonitorConfig, TGMonitorConfigUpdate
+    TGMonitorConfig, TGMonitorConfigUpdate,
+    PnLAnalysisResponse, PnLSummary, PnLCurvePoint, PnLTradeRecord
 )
 from app.config import settings, config_manager
 from app.services.binance_api import binance_api
@@ -571,11 +572,166 @@ async def update_tg_monitor_config(data: TGMonitorConfigUpdate):
         logger.info(f"TG监控价格变化阈值已更新为: {data.min_price_change_percent}%")
         
         return MessageResponse(
-            success=True, 
+            success=True,
             message=f"TG监控配置已更新，价格变化阈值: {data.min_price_change_percent}%"
         )
     except Exception as e:
         await session.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        await session.close()
+
+
+# ========== PnL Analysis ==========
+
+@router.get("/pnl/analysis", response_model=PnLAnalysisResponse)
+async def get_pnl_analysis(
+    start_date: Optional[str] = Query(None, description="开始日期 (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="结束日期 (YYYY-MM-DD)"),
+    symbol: Optional[str] = Query(None, description="交易对筛选")
+):
+    """获取PnL分析数据"""
+    from datetime import datetime, timedelta
+
+    session = await DatabaseManager.get_session()
+    try:
+        # 解析日期范围
+        if start_date:
+            period_start = datetime.strptime(start_date, "%Y-%m-%d")
+        else:
+            period_start = datetime.utcnow() - timedelta(days=30)
+
+        if end_date:
+            period_end = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)
+        else:
+            period_end = datetime.utcnow() + timedelta(days=1)
+
+        # 构建查询 - 只查询已关闭的仓位
+        query = select(Position).where(
+            Position.status == "CLOSED",
+            Position.closed_at >= period_start,
+            Position.closed_at < period_end
+        ).order_by(Position.closed_at.asc())
+
+        if symbol:
+            query = query.where(Position.symbol == symbol.upper())
+
+        result = await session.execute(query)
+        positions = result.scalars().all()
+
+        # 计算统计数据
+        total_trades = len(positions)
+        winning_trades = sum(1 for p in positions if (p.pnl or 0) > 0)
+        losing_trades = sum(1 for p in positions if (p.pnl or 0) < 0)
+
+        total_pnl = sum(p.pnl or 0 for p in positions)
+        total_pnl_percent = sum(p.pnl_percent or 0 for p in positions)
+
+        wins = [p.pnl for p in positions if (p.pnl or 0) > 0]
+        losses = [p.pnl for p in positions if (p.pnl or 0) < 0]
+
+        avg_win = sum(wins) / len(wins) if wins else 0
+        avg_loss = sum(losses) / len(losses) if losses else 0
+
+        total_win_amount = sum(wins) if wins else 0
+        total_loss_amount = abs(sum(losses)) if losses else 0
+        profit_factor = total_win_amount / total_loss_amount if total_loss_amount > 0 else float('inf') if total_win_amount > 0 else 0
+
+        max_win = max(wins) if wins else 0
+        max_loss = min(losses) if losses else 0
+
+        # 计算连胜/连亏
+        max_consecutive_wins = 0
+        max_consecutive_losses = 0
+        current_wins = 0
+        current_losses = 0
+
+        for p in positions:
+            pnl = p.pnl or 0
+            if pnl > 0:
+                current_wins += 1
+                current_losses = 0
+                max_consecutive_wins = max(max_consecutive_wins, current_wins)
+            elif pnl < 0:
+                current_losses += 1
+                current_wins = 0
+                max_consecutive_losses = max(max_consecutive_losses, current_losses)
+            else:
+                current_wins = 0
+                current_losses = 0
+
+        # 计算平均持仓时间
+        holding_times = []
+        for p in positions:
+            if p.opened_at and p.closed_at:
+                delta = (p.closed_at - p.opened_at).total_seconds() / 60
+                holding_times.append(delta)
+        avg_holding_time = sum(holding_times) / len(holding_times) if holding_times else 0
+
+        # 构建PnL曲线数据
+        curve_data = []
+        cumulative_pnl = 0
+        for i, p in enumerate(positions):
+            cumulative_pnl += p.pnl or 0
+            curve_data.append(PnLCurvePoint(
+                timestamp=p.closed_at or datetime.utcnow(),
+                cumulative_pnl=round(cumulative_pnl, 2),
+                trade_count=i + 1
+            ))
+
+        # 构建交易记录
+        trades = [PnLTradeRecord(
+            id=p.id,
+            symbol=p.symbol,
+            side=p.side,
+            entry_price=p.entry_price,
+            quantity=p.quantity,
+            leverage=p.leverage,
+            pnl=p.pnl,
+            pnl_percent=p.pnl_percent,
+            opened_at=p.opened_at,
+            closed_at=p.closed_at,
+            close_reason=p.close_reason
+        ) for p in positions]
+
+        # 构建摘要
+        summary = PnLSummary(
+            total_trades=total_trades,
+            winning_trades=winning_trades,
+            losing_trades=losing_trades,
+            win_rate=round((winning_trades / total_trades * 100) if total_trades > 0 else 0, 2),
+            total_pnl=round(total_pnl, 2),
+            total_pnl_percent=round(total_pnl_percent, 2),
+            avg_win=round(avg_win, 2),
+            avg_loss=round(avg_loss, 2),
+            profit_factor=round(profit_factor, 2) if profit_factor != float('inf') else 999.99,
+            max_win=round(max_win, 2),
+            max_loss=round(max_loss, 2),
+            max_consecutive_wins=max_consecutive_wins,
+            max_consecutive_losses=max_consecutive_losses,
+            avg_holding_time_minutes=round(avg_holding_time, 1)
+        )
+
+        return PnLAnalysisResponse(
+            summary=summary,
+            curve_data=curve_data,
+            trades=trades,
+            period_start=period_start,
+            period_end=period_end
+        )
+    finally:
+        await session.close()
+
+
+@router.get("/pnl/symbols")
+async def get_pnl_symbols():
+    """获取有交易记录的交易对列表"""
+    session = await DatabaseManager.get_session()
+    try:
+        result = await session.execute(
+            select(Position.symbol).where(Position.status == "CLOSED").distinct()
+        )
+        symbols = [row[0] for row in result.fetchall()]
+        return {"symbols": sorted(symbols)}
     finally:
         await session.close()

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Binance Futures Bot</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <style>
         :root {
             --bg-primary: #0a0e17;
@@ -471,6 +473,7 @@
 
         <div class="tabs">
             <button class="tab active" data-tab="trading">交易对</button>
+            <button class="tab" data-tab="pnl">盈亏分析</button>
             <button class="tab" data-tab="stoploss">止损记录</button>
             <button class="tab" data-tab="logs">日志</button>
             <button class="tab" data-tab="config">配置</button>
@@ -498,6 +501,123 @@
                             </tr>
                         </thead>
                         <tbody id="pairs-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PnL Analysis Panel -->
+        <div class="panel" id="pnl-panel">
+            <!-- 时间选择器 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">盈亏分析</h2>
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label class="form-label" style="margin: 0; white-space: nowrap;">开始日期</label>
+                            <input type="date" class="form-input" id="pnl-start-date" style="width: 150px; padding: 8px;">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label class="form-label" style="margin: 0; white-space: nowrap;">结束日期</label>
+                            <input type="date" class="form-input" id="pnl-end-date" style="width: 150px; padding: 8px;">
+                        </div>
+                        <select class="form-input" id="pnl-symbol-filter" style="width: 150px; padding: 8px;">
+                            <option value="">全部交易对</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="loadPnLAnalysis()">查询</button>
+                        <button class="btn btn-secondary" onclick="resetPnLFilters()">重置</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+                <div class="stat-card">
+                    <div class="stat-label">总交易次数</div>
+                    <div class="stat-value" id="pnl-total-trades">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">胜率</div>
+                    <div class="stat-value" id="pnl-win-rate">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">盈亏比</div>
+                    <div class="stat-value" id="pnl-profit-factor">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">总盈亏</div>
+                    <div class="stat-value" id="pnl-total">0 USDT</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">盈利 / 亏损</div>
+                    <div class="stat-value" id="pnl-win-loss">0 / 0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">平均持仓时间</div>
+                    <div class="stat-value" id="pnl-avg-time">0 分钟</div>
+                </div>
+            </div>
+
+            <!-- 更多统计信息 -->
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+                <div class="stat-card">
+                    <div class="stat-label">平均盈利</div>
+                    <div class="stat-value positive" id="pnl-avg-win">0 USDT</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">平均亏损</div>
+                    <div class="stat-value negative" id="pnl-avg-loss">0 USDT</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">最大单笔盈利</div>
+                    <div class="stat-value positive" id="pnl-max-win">0 USDT</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">最大单笔亏损</div>
+                    <div class="stat-value negative" id="pnl-max-loss">0 USDT</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">最大连胜</div>
+                    <div class="stat-value positive" id="pnl-max-wins">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">最大连亏</div>
+                    <div class="stat-value negative" id="pnl-max-losses">0</div>
+                </div>
+            </div>
+
+            <!-- PnL曲线图 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">累计盈亏曲线</h2>
+                </div>
+                <div style="position: relative; height: 350px;">
+                    <canvas id="pnl-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- 交易记录表 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">交易记录</h2>
+                    <span id="pnl-record-count" style="color: var(--text-secondary); font-size: 0.875rem;"></span>
+                </div>
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>平仓时间</th>
+                                <th>交易对</th>
+                                <th>方向</th>
+                                <th>杠杆</th>
+                                <th>入场价</th>
+                                <th>数量</th>
+                                <th>盈亏</th>
+                                <th>盈亏%</th>
+                                <th>平仓原因</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pnl-trades-table"></tbody>
                     </table>
                 </div>
             </div>
@@ -1374,6 +1494,270 @@
             }
         });
 
+        // ========== PnL Analysis ==========
+
+        let pnlChart = null;
+
+        // 初始化PnL分析
+        async function initPnLAnalysis() {
+            // 设置默认日期范围（最近30天）
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+            document.getElementById('pnl-end-date').value = today.toISOString().split('T')[0];
+            document.getElementById('pnl-start-date').value = thirtyDaysAgo.toISOString().split('T')[0];
+
+            // 加载交易对列表
+            await loadPnLSymbols();
+
+            // 加载PnL数据
+            await loadPnLAnalysis();
+        }
+
+        // 加载交易对列表
+        async function loadPnLSymbols() {
+            try {
+                const data = await apiCall('/pnl/symbols');
+                const select = document.getElementById('pnl-symbol-filter');
+                select.innerHTML = '<option value="">全部交易对</option>' +
+                    data.symbols.map(s => `<option value="${s}">${s}</option>`).join('');
+            } catch (e) {
+                console.error('Failed to load PnL symbols:', e);
+            }
+        }
+
+        // 加载PnL分析数据
+        async function loadPnLAnalysis() {
+            try {
+                const startDate = document.getElementById('pnl-start-date').value;
+                const endDate = document.getElementById('pnl-end-date').value;
+                const symbol = document.getElementById('pnl-symbol-filter').value;
+
+                let url = '/pnl/analysis?';
+                if (startDate) url += `start_date=${startDate}&`;
+                if (endDate) url += `end_date=${endDate}&`;
+                if (symbol) url += `symbol=${symbol}&`;
+
+                const data = await apiCall(url);
+                updatePnLStats(data.summary);
+                updatePnLChart(data.curve_data);
+                updatePnLTable(data.trades);
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        }
+
+        // 更新统计数据
+        function updatePnLStats(summary) {
+            document.getElementById('pnl-total-trades').textContent = summary.total_trades;
+
+            const winRateEl = document.getElementById('pnl-win-rate');
+            winRateEl.textContent = summary.win_rate.toFixed(1) + '%';
+            winRateEl.className = 'stat-value ' + (summary.win_rate >= 50 ? 'positive' : 'negative');
+
+            const profitFactorEl = document.getElementById('pnl-profit-factor');
+            profitFactorEl.textContent = summary.profit_factor >= 999 ? '∞' : summary.profit_factor.toFixed(2);
+            profitFactorEl.className = 'stat-value ' + (summary.profit_factor >= 1 ? 'positive' : 'negative');
+
+            const totalPnlEl = document.getElementById('pnl-total');
+            totalPnlEl.textContent = (summary.total_pnl >= 0 ? '+' : '') + summary.total_pnl.toFixed(2) + ' USDT';
+            totalPnlEl.className = 'stat-value ' + (summary.total_pnl >= 0 ? 'positive' : 'negative');
+
+            document.getElementById('pnl-win-loss').innerHTML =
+                `<span class="positive">${summary.winning_trades}</span> / <span class="negative">${summary.losing_trades}</span>`;
+
+            document.getElementById('pnl-avg-time').textContent =
+                summary.avg_holding_time_minutes < 60
+                    ? summary.avg_holding_time_minutes.toFixed(0) + ' 分钟'
+                    : (summary.avg_holding_time_minutes / 60).toFixed(1) + ' 小时';
+
+            document.getElementById('pnl-avg-win').textContent = '+' + summary.avg_win.toFixed(2) + ' USDT';
+            document.getElementById('pnl-avg-loss').textContent = summary.avg_loss.toFixed(2) + ' USDT';
+            document.getElementById('pnl-max-win').textContent = '+' + summary.max_win.toFixed(2) + ' USDT';
+            document.getElementById('pnl-max-loss').textContent = summary.max_loss.toFixed(2) + ' USDT';
+            document.getElementById('pnl-max-wins').textContent = summary.max_consecutive_wins;
+            document.getElementById('pnl-max-losses').textContent = summary.max_consecutive_losses;
+        }
+
+        // 更新PnL曲线图
+        function updatePnLChart(curveData) {
+            const ctx = document.getElementById('pnl-chart').getContext('2d');
+
+            if (pnlChart) {
+                pnlChart.destroy();
+            }
+
+            if (curveData.length === 0) {
+                // 无数据时显示空图表
+                pnlChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: '累计盈亏 (USDT)',
+                            data: [],
+                            borderColor: 'rgba(0, 255, 136, 1)',
+                            backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        }
+                    }
+                });
+                return;
+            }
+
+            const labels = curveData.map(p => new Date(p.timestamp));
+            const values = curveData.map(p => p.cumulative_pnl);
+
+            // 确定颜色（最终盈亏）
+            const finalPnl = values[values.length - 1] || 0;
+            const lineColor = finalPnl >= 0 ? 'rgba(0, 255, 136, 1)' : 'rgba(255, 71, 87, 1)';
+            const bgColor = finalPnl >= 0 ? 'rgba(0, 255, 136, 0.1)' : 'rgba(255, 71, 87, 0.1)';
+
+            pnlChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '累计盈亏 (USDT)',
+                        data: values,
+                        borderColor: lineColor,
+                        backgroundColor: bgColor,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: curveData.length > 50 ? 0 : 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: lineColor,
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#f9fafb',
+                            bodyColor: '#f9fafb',
+                            borderColor: 'rgba(55, 65, 81, 1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(context) {
+                                    const date = new Date(context[0].label);
+                                    return date.toLocaleString('zh-CN');
+                                },
+                                label: function(context) {
+                                    const pnl = context.parsed.y;
+                                    const tradeNum = curveData[context.dataIndex].trade_count;
+                                    return [
+                                        `累计盈亏: ${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} USDT`,
+                                        `交易次数: ${tradeNum}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                displayFormats: {
+                                    hour: 'MM/dd HH:mm',
+                                    day: 'MM/dd'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(55, 65, 81, 0.5)'
+                            },
+                            ticks: {
+                                color: '#9ca3af'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(55, 65, 81, 0.5)'
+                            },
+                            ticks: {
+                                color: '#9ca3af',
+                                callback: function(value) {
+                                    return (value >= 0 ? '+' : '') + value.toFixed(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新交易记录表
+        function updatePnLTable(trades) {
+            const tbody = document.getElementById('pnl-trades-table');
+            document.getElementById('pnl-record-count').textContent = `共 ${trades.length} 条记录`;
+
+            if (trades.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary)">暂无交易记录</td></tr>';
+                return;
+            }
+
+            // 按平仓时间倒序显示
+            const sortedTrades = [...trades].reverse();
+
+            tbody.innerHTML = sortedTrades.map(trade => {
+                const pnlClass = (trade.pnl || 0) >= 0 ? 'positive' : 'negative';
+                const pnlSign = (trade.pnl || 0) >= 0 ? '+' : '';
+                const closeReasonText = {
+                    'SIGNAL': '信号平仓',
+                    'STOP_LOSS': '止损',
+                    'TRAILING_STOP': '移动止损',
+                    'MANUAL': '手动平仓'
+                }[trade.close_reason] || trade.close_reason || '-';
+
+                return `
+                    <tr>
+                        <td style="white-space: nowrap;">${trade.closed_at ? new Date(trade.closed_at).toLocaleString('zh-CN', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}) : '-'}</td>
+                        <td><strong>${trade.symbol}</strong></td>
+                        <td><span class="badge ${trade.side === 'LONG' ? 'badge-success' : 'badge-danger'}">${trade.side === 'LONG' ? '多' : '空'}</span></td>
+                        <td>${trade.leverage}x</td>
+                        <td>${trade.entry_price.toFixed(6)}</td>
+                        <td>${trade.quantity.toFixed(4)}</td>
+                        <td class="${pnlClass}">${pnlSign}${(trade.pnl || 0).toFixed(2)}</td>
+                        <td class="${pnlClass}">${pnlSign}${(trade.pnl_percent || 0).toFixed(2)}%</td>
+                        <td><span class="badge badge-info">${closeReasonText}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 重置筛选条件
+        function resetPnLFilters() {
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+            document.getElementById('pnl-end-date').value = today.toISOString().split('T')[0];
+            document.getElementById('pnl-start-date').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('pnl-symbol-filter').value = '';
+
+            loadPnLAnalysis();
+        }
+
         // Initial load
         loadPairs();
         loadWsStatus();
@@ -1382,7 +1766,8 @@
         loadStopLossLogs();
         loadTrailingStopConfig();
         loadTGMonitorConfig();
-        
+        initPnLAnalysis();
+
         // Refresh periodically
         setInterval(loadWsStatus, 30000);
         setInterval(loadBalance, 60000);
