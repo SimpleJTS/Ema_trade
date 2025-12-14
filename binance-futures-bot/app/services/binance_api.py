@@ -449,9 +449,125 @@ class BinanceAPI:
         
         # 按涨跌幅绝对值降序排列
         high_change.sort(key=lambda x: abs(x["priceChangePercent"]), reverse=True)
-        
+
         logger.info(f"找到 {len(high_change)} 个涨跌幅绝对值 >= {min_change_percent}% 的币种")
         return high_change
+
+    async def get_income_history(self, symbol: str = None, income_type: str = None,
+                                  start_time: int = None, end_time: int = None,
+                                  limit: int = 1000) -> List[dict]:
+        """获取收益历史
+
+        Args:
+            symbol: 交易对（可选）
+            income_type: 收入类型，如 REALIZED_PNL, COMMISSION, FUNDING_FEE 等
+            start_time: 开始时间戳（毫秒）
+            end_time: 结束时间戳（毫秒）
+            limit: 返回数量，默认1000，最大1000
+
+        Returns:
+            List[dict]: 收益记录列表
+                - symbol: 交易对
+                - incomeType: 收入类型
+                - income: 收入金额
+                - asset: 资产类型
+                - time: 时间戳
+                - info: 备注信息
+                - tranId: 交易ID
+                - tradeId: 成交ID
+        """
+        params = {"limit": min(limit, 1000)}
+        if symbol:
+            params["symbol"] = symbol
+        if income_type:
+            params["incomeType"] = income_type
+        if start_time:
+            params["startTime"] = start_time
+        if end_time:
+            params["endTime"] = end_time
+
+        return await self._request("GET", "/fapi/v1/income", params, signed=True)
+
+    async def get_all_income_history(self, symbol: str = None, income_type: str = None,
+                                      start_time: int = None, end_time: int = None) -> List[dict]:
+        """获取所有收益历史（自动分页+分段查询）
+
+        由于API限制：
+        1. 每次最多1000条
+        2. startTime和endTime范围不能超过7天
+        此方法会自动分段和分页获取所有数据
+        """
+        all_records = []
+
+        # 7天的毫秒数
+        seven_days_ms = 7 * 24 * 60 * 60 * 1000
+
+        # 如果没有指定时间范围，使用默认值
+        if end_time is None:
+            import time
+            end_time = int(time.time() * 1000)
+        if start_time is None:
+            start_time = end_time - seven_days_ms
+
+        # 分段查询（每段最多7天）
+        current_start = start_time
+        while current_start < end_time:
+            # 计算当前段的结束时间（最多7天）
+            current_end = min(current_start + seven_days_ms, end_time)
+
+            # 在当前时间段内分页查询
+            segment_start = current_start
+            while True:
+                records = await self.get_income_history(
+                    symbol=symbol,
+                    income_type=income_type,
+                    start_time=segment_start,
+                    end_time=current_end,
+                    limit=1000
+                )
+
+                if not records:
+                    break
+
+                all_records.extend(records)
+
+                # 如果返回数量小于1000，说明当前段已经没有更多数据
+                if len(records) < 1000:
+                    break
+
+                # 更新起始时间为最后一条记录的时间+1ms
+                segment_start = records[-1]["time"] + 1
+
+            # 移动到下一个7天段
+            current_start = current_end
+
+        # 按时间排序
+        all_records.sort(key=lambda x: x.get("time", 0))
+        return all_records
+
+    async def get_user_trades(self, symbol: str, start_time: int = None,
+                               end_time: int = None, limit: int = 1000) -> List[dict]:
+        """获取用户成交历史
+
+        Args:
+            symbol: 交易对（必填）
+            start_time: 开始时间戳（毫秒）
+            end_time: 结束时间戳（毫秒）
+            limit: 返回数量，默认1000，最大1000
+
+        Returns:
+            List[dict]: 成交记录列表
+        """
+        params = {
+            "symbol": symbol,
+            "limit": min(limit, 1000)
+        }
+        if start_time:
+            params["startTime"] = start_time
+        if end_time:
+            params["endTime"] = end_time
+
+        return await self._request("GET", "/fapi/v1/userTrades", params, signed=True)
     
     async def calculate_order_quantity(self, symbol: str, leverage: int, 
                                         position_percent: float = None) -> float:
