@@ -490,34 +490,59 @@ class BinanceAPI:
 
     async def get_all_income_history(self, symbol: str = None, income_type: str = None,
                                       start_time: int = None, end_time: int = None) -> List[dict]:
-        """获取所有收益历史（自动分页）
+        """获取所有收益历史（自动分页+分段查询）
 
-        由于API限制每次最多1000条，此方法会自动分页获取所有数据
+        由于API限制：
+        1. 每次最多1000条
+        2. startTime和endTime范围不能超过7天
+        此方法会自动分段和分页获取所有数据
         """
         all_records = []
+
+        # 7天的毫秒数
+        seven_days_ms = 7 * 24 * 60 * 60 * 1000
+
+        # 如果没有指定时间范围，使用默认值
+        if end_time is None:
+            import time
+            end_time = int(time.time() * 1000)
+        if start_time is None:
+            start_time = end_time - seven_days_ms
+
+        # 分段查询（每段最多7天）
         current_start = start_time
+        while current_start < end_time:
+            # 计算当前段的结束时间（最多7天）
+            current_end = min(current_start + seven_days_ms, end_time)
 
-        while True:
-            records = await self.get_income_history(
-                symbol=symbol,
-                income_type=income_type,
-                start_time=current_start,
-                end_time=end_time,
-                limit=1000
-            )
+            # 在当前时间段内分页查询
+            segment_start = current_start
+            while True:
+                records = await self.get_income_history(
+                    symbol=symbol,
+                    income_type=income_type,
+                    start_time=segment_start,
+                    end_time=current_end,
+                    limit=1000
+                )
 
-            if not records:
-                break
+                if not records:
+                    break
 
-            all_records.extend(records)
+                all_records.extend(records)
 
-            # 如果返回数量小于1000，说明已经没有更多数据
-            if len(records) < 1000:
-                break
+                # 如果返回数量小于1000，说明当前段已经没有更多数据
+                if len(records) < 1000:
+                    break
 
-            # 更新起始时间为最后一条记录的时间+1ms
-            current_start = records[-1]["time"] + 1
+                # 更新起始时间为最后一条记录的时间+1ms
+                segment_start = records[-1]["time"] + 1
 
+            # 移动到下一个7天段
+            current_start = current_end
+
+        # 按时间排序
+        all_records.sort(key=lambda x: x.get("time", 0))
         return all_records
 
     async def get_user_trades(self, symbol: str, start_time: int = None,
