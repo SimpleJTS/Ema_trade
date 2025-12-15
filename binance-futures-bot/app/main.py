@@ -335,9 +335,14 @@ async def lifespan(app: FastAPI):
     
     # 启动移动止损管理器
     await trailing_stop_manager.start()
+    logger.info("移动止损管理器启动完成")
 
     # 启动止损订单守护
-    await stop_loss_guard.start()
+    try:
+        await stop_loss_guard.start()
+        logger.info("止损守护服务启动完成")
+    except Exception as e:
+        logger.error(f"止损守护服务启动失败: {e}")
 
     # 启动24小时涨跌幅监控（无需TG配置，直接调用币安API）
     await oi_monitor.start(check_interval=300)  # 每5分钟检查一次
