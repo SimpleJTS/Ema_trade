@@ -233,7 +233,7 @@ class StopLossGuard:
             # 取消所有现有止损单
             try:
                 open_orders = await binance_api.get_open_orders(symbol)
-                stop_orders = [o for o in open_orders if o.get("type") == "STOP_MARKET"]
+                stop_orders = [o for o in open_orders if o.get("type") in ("STOP_MARKET", "STOP")]
                 for order in stop_orders:
                     try:
                         await binance_api.cancel_order(symbol, str(order.get("orderId")))
@@ -286,7 +286,7 @@ class StopLossGuard:
             current_stop_price = None
             try:
                 open_orders = await binance_api.get_open_orders(symbol)
-                stop_orders = [o for o in open_orders if o.get("type") == "STOP_MARKET"]
+                stop_orders = [o for o in open_orders if o.get("type") in ("STOP_MARKET", "STOP")]
                 if stop_orders:
                     current_stop_price = float(stop_orders[0].get("stopPrice", 0))
             except Exception as e:

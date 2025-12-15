@@ -322,8 +322,8 @@ class BinanceAPI:
     
     async def place_stop_loss_order(self, symbol: str, side: str, quantity: float,
                                      stop_price: float, close_position: bool = False) -> dict:
-        """下止损单
-        
+        """下止损单（使用限价止损STOP类型）
+
         Args:
             symbol: 交易对
             side: BUY(空头止损)/SELL(多头止损)
@@ -333,37 +333,50 @@ class BinanceAPI:
         """
         # 获取精度信息
         precision_info = await self.get_symbol_precision(symbol)
-        
+
         # 格式化止损价格
         formatted_price = self.format_price(stop_price, precision_info)
         if Decimal(formatted_price) <= 0:
             raise ValueError(f"无效的止损价格: {stop_price} -> {formatted_price} (tick_size={precision_info['tick_size']})")
-        
+
+        # 计算限价：止损触发后的限价单价格
+        # 为了确保成交，给一定滑点空间
+        stop_price_float = float(formatted_price)
+        if side == "SELL":
+            # 卖出止损（多头平仓），限价设置比止损价低0.5%
+            limit_price = stop_price_float * 0.995
+        else:
+            # 买入止损（空头平仓），限价设置比止损价高0.5%
+            limit_price = stop_price_float * 1.005
+        formatted_limit_price = self.format_price(limit_price, precision_info)
+
         params = {
             "symbol": symbol,
             "side": side,
-            "type": "STOP_MARKET",
+            "type": "STOP",  # 使用限价止损而非市价止损
             "stopPrice": formatted_price,
-            "workingType": "MARK_PRICE"  # 使用标记价格触发，避免插针
+            "price": formatted_limit_price,
+            "workingType": "MARK_PRICE",  # 使用标记价格触发，避免插针
+            "timeInForce": "GTC"  # Good Till Cancel
         }
-        
+
         if close_position:
             params["closePosition"] = "true"
         else:
             # 格式化数量
             formatted_qty = self.format_quantity(quantity, precision_info)
             min_qty = Decimal(precision_info['min_qty'])
-            
+
             if Decimal(formatted_qty) <= 0:
                 raise ValueError(f"无效的下单数量: {quantity} -> {formatted_qty} (step_size={precision_info['step_size']})")
             if Decimal(formatted_qty) < min_qty:
                 raise ValueError(f"下单数量 {formatted_qty} 小于最小值 {min_qty}")
-            
+
             params["quantity"] = formatted_qty
             params["reduceOnly"] = "true"
-        
+
         side_desc = "买入止损" if side == "BUY" else "卖出止损"
-        logger.info(f"[{symbol}] 提交止损单: {side_desc}, 触发价={formatted_price}, 数量={params.get('quantity', '全仓')}")
+        logger.info(f"[{symbol}] 提交止损单: {side_desc}, 触发价={formatted_price}, 限价={formatted_limit_price}, 数量={params.get('quantity', '全仓')}")
         return await self._request("POST", "/fapi/v1/order", params, signed=True)
     
     async def cancel_order(self, symbol: str, order_id: str) -> dict:
