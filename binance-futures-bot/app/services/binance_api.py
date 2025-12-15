@@ -394,6 +394,17 @@ class BinanceAPI:
             logger.error(f"[{symbol}] 取消订单失败: {e}")
             raise
 
+    async def cancel_algo_order(self, symbol: str, algo_id: str) -> dict:
+        """取消算法订单（使用python-binance库）"""
+        client = self._get_binance_client()
+        try:
+            result = client.futures_cancel_algo_order(symbol=symbol, algoId=int(algo_id))
+            logger.info(f"[{symbol}] 取消算法订单成功: {algo_id}")
+            return result
+        except BinanceAPIException as e:
+            logger.error(f"[{symbol}] 取消算法订单失败: {e}")
+            raise
+
     async def cancel_all_orders(self, symbol: str) -> dict:
         """取消某个交易对的所有订单（使用python-binance库）"""
         client = self._get_binance_client()
@@ -405,25 +416,91 @@ class BinanceAPI:
             logger.error(f"[{symbol}] 取消所有订单失败: {e}")
             raise
     
-    async def get_open_orders(self, symbol: str = None) -> List[dict]:
-        """获取当前挂单（使用python-binance库）"""
+    async def get_open_algo_orders(self, symbol: str = None) -> List[dict]:
+        """获取当前算法订单（Algo Orders，包括止损单等）
+        
+        Args:
+            symbol: 交易对，如果为None则获取所有交易对的算法订单
+            
+        Returns:
+            算法订单列表
+        """
         client = self._get_binance_client()
         try:
-            logger.debug(f"[{symbol or 'ALL'}] 正在查询挂单...")
+            logger.debug(f"[{symbol or 'ALL'}] 正在查询算法订单...")
             if symbol:
-                orders = client.futures_get_open_orders(symbol=symbol)
+                algo_orders = client.futures_get_open_algo_orders(symbol=symbol)
             else:
-                orders = client.futures_get_open_orders()
+                algo_orders = client.futures_get_open_algo_orders()
             # 调试日志
-            if orders:
-                order_types = [f"{o.get('type')}(ID:{o.get('orderId')})" for o in orders]
-                logger.info(f"[{symbol or 'ALL'}] 获取到{len(orders)}个挂单: {order_types}")
+            if algo_orders:
+                order_types = [f"{o.get('type')}(ID:{o.get('algoId')})" for o in algo_orders]
+                logger.info(f"[{symbol or 'ALL'}] 获取到{len(algo_orders)}个算法订单: {order_types}")
             else:
-                logger.debug(f"[{symbol or 'ALL'}] 查询结果: 无挂单 (orders={orders})")
-            return orders if orders else []
+                logger.debug(f"[{symbol or 'ALL'}] 查询结果: 无算法订单")
+            return algo_orders if algo_orders else []
         except BinanceAPIException as e:
-            logger.error(f"[{symbol or 'ALL'}] 获取挂单失败: {e}")
+            logger.error(f"[{symbol or 'ALL'}] 获取算法订单失败: {e}")
             raise
+        except Exception as e:
+            logger.error(f"[{symbol or 'ALL'}] 获取算法订单异常: {type(e).__name__}: {e}")
+            raise
+    
+    async def get_open_orders(self, symbol: str = None) -> List[dict]:
+        """获取当前挂单（包括普通订单和算法订单）
+        
+        Args:
+            symbol: 交易对，如果为None则获取所有交易对的订单
+            
+        Returns:
+            订单列表（包含普通订单和算法订单）
+        """
+        all_orders = []
+        client = self._get_binance_client()
+        
+        try:
+            # 1. 获取普通订单
+            try:
+                logger.debug(f"[{symbol or 'ALL'}] 正在查询普通挂单...")
+                if symbol:
+                    normal_orders = client.futures_get_open_orders(symbol=symbol)
+                else:
+                    normal_orders = client.futures_get_open_orders()
+                if normal_orders:
+                    all_orders.extend(normal_orders)
+                    logger.debug(f"[{symbol or 'ALL'}] 获取到{len(normal_orders)}个普通订单")
+            except BinanceAPIException as e:
+                logger.warning(f"[{symbol or 'ALL'}] 获取普通订单失败: {e}")
+            except Exception as e:
+                logger.warning(f"[{symbol or 'ALL'}] 获取普通订单异常: {type(e).__name__}: {e}")
+            
+            # 2. 获取算法订单（使用新的API方法）
+            try:
+                logger.debug(f"[{symbol or 'ALL'}] 正在查询算法订单...")
+                if symbol:
+                    algo_orders = client.futures_get_open_algo_orders(symbol=symbol)
+                else:
+                    algo_orders = client.futures_get_open_algo_orders()
+                if algo_orders:
+                    all_orders.extend(algo_orders)
+                    logger.debug(f"[{symbol or 'ALL'}] 获取到{len(algo_orders)}个算法订单")
+            except BinanceAPIException as e:
+                logger.warning(f"[{symbol or 'ALL'}] 获取算法订单失败: {e}")
+            except Exception as e:
+                logger.warning(f"[{symbol or 'ALL'}] 获取算法订单异常: {type(e).__name__}: {e}")
+            
+            # 调试日志
+            if all_orders:
+                order_types = []
+                for o in all_orders:
+                    order_id = o.get('algoId') or o.get('orderId', 'N/A')
+                    order_type = o.get('type', 'UNKNOWN')
+                    order_types.append(f"{order_type}(ID:{order_id})")
+                logger.info(f"[{symbol or 'ALL'}] 总共获取到{len(all_orders)}个挂单: {order_types}")
+            else:
+                logger.debug(f"[{symbol or 'ALL'}] 查询结果: 无挂单")
+            
+            return all_orders
         except Exception as e:
             logger.error(f"[{symbol or 'ALL'}] 获取挂单异常: {type(e).__name__}: {e}")
             raise

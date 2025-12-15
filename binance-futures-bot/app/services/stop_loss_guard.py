@@ -230,14 +230,19 @@ class StopLossGuard:
             formatted_price = binance_api.format_price(stop_price, precision_info)
             formatted_qty = binance_api.format_quantity(quantity, precision_info)
             
-            # 取消所有现有止损单
+            # 取消所有现有止损单（算法订单使用algoId，普通订单使用orderId）
             try:
                 open_orders = await binance_api.get_open_orders(symbol)
                 stop_orders = [o for o in open_orders if o.get("type") in ("STOP_MARKET", "STOP")]
                 for order in stop_orders:
                     try:
-                        await binance_api.cancel_order(symbol, str(order.get("orderId")))
-                        logger.info(f"[{symbol}] 已取消原止损单: {order.get('orderId')}")
+                        # 算法订单使用algoId，普通订单使用orderId
+                        order_id = order.get("algoId") or order.get("orderId")
+                        if order.get("algoId"):
+                            await binance_api.cancel_algo_order(symbol, str(order_id))
+                        else:
+                            await binance_api.cancel_order(symbol, str(order_id))
+                        logger.info(f"[{symbol}] 已取消原止损单: {order_id}")
                     except Exception as e:
                         logger.warning(f"[{symbol}] 取消止损单失败: {e}")
             except Exception as e:
@@ -252,7 +257,8 @@ class StopLossGuard:
                 stop_price=float(formatted_price)
             )
             
-            order_id = str(stop_order.get("orderId", ""))
+            # 算法订单返回algoId，普通订单返回orderId
+            order_id = str(stop_order.get("algoId") or stop_order.get("orderId", ""))
             logger.info(f"[{symbol}] 已设置止损单: 价格={formatted_price}, 数量={formatted_qty}, 订单ID={order_id}")
             
             # TG通知
@@ -290,12 +296,15 @@ class StopLossGuard:
                 logger.info(f"[{symbol}] 查询到{len(open_orders) if open_orders else 0}个挂单")
                 if open_orders:
                     for o in open_orders:
-                        logger.info(f"[{symbol}] 挂单详情: type={o.get('type')}, orderId={o.get('orderId')}, stopPrice={o.get('stopPrice')}")
-                # 检查所有类型的止损单
+                        order_id = o.get('algoId') or o.get('orderId', 'N/A')
+                        stop_price = o.get('stopPrice') or o.get('triggerPrice', 'N/A')
+                        logger.info(f"[{symbol}] 挂单详情: type={o.get('type')}, ID={order_id}, stopPrice={stop_price}")
+                # 检查所有类型的止损单（算法订单和普通订单）
                 stop_orders = [o for o in open_orders if o.get("type") in ("STOP_MARKET", "STOP", "STOP_LOSS", "STOP_LOSS_LIMIT")]
                 existing_stop_orders_count = len(stop_orders)
                 if stop_orders:
-                    current_stop_price = float(stop_orders[0].get("stopPrice", 0))
+                    # 算法订单使用triggerPrice，普通订单使用stopPrice
+                    current_stop_price = float(stop_orders[0].get("stopPrice") or stop_orders[0].get("triggerPrice", 0))
                     logger.info(f"[{symbol}] 检测到{len(stop_orders)}个止损单, 当前止损价={current_stop_price}")
             except Exception as e:
                 logger.warning(f"[{symbol}] 检查当前止损单失败: {e}")
