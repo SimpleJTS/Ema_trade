@@ -384,24 +384,39 @@ class BinanceAPI:
             raise
     
     async def cancel_order(self, symbol: str, order_id: str) -> dict:
-        """取消订单"""
-        params = {
-            "symbol": symbol,
-            "orderId": order_id
-        }
-        return await self._request("DELETE", "/fapi/v1/order", params, signed=True)
-    
+        """取消订单（使用python-binance库）"""
+        client = self._get_binance_client()
+        try:
+            result = client.futures_cancel_order(symbol=symbol, orderId=int(order_id))
+            logger.info(f"[{symbol}] 取消订单成功: {order_id}")
+            return result
+        except BinanceAPIException as e:
+            logger.error(f"[{symbol}] 取消订单失败: {e}")
+            raise
+
     async def cancel_all_orders(self, symbol: str) -> dict:
-        """取消某个交易对的所有订单"""
-        params = {"symbol": symbol}
-        return await self._request("DELETE", "/fapi/v1/allOpenOrders", params, signed=True)
+        """取消某个交易对的所有订单（使用python-binance库）"""
+        client = self._get_binance_client()
+        try:
+            result = client.futures_cancel_all_open_orders(symbol=symbol)
+            logger.info(f"[{symbol}] 取消所有订单成功")
+            return result
+        except BinanceAPIException as e:
+            logger.error(f"[{symbol}] 取消所有订单失败: {e}")
+            raise
     
     async def get_open_orders(self, symbol: str = None) -> List[dict]:
-        """获取当前挂单"""
-        params = {}
-        if symbol:
-            params["symbol"] = symbol
-        return await self._request("GET", "/fapi/v1/openOrders", params, signed=True)
+        """获取当前挂单（使用python-binance库）"""
+        client = self._get_binance_client()
+        try:
+            if symbol:
+                orders = client.futures_get_open_orders(symbol=symbol)
+            else:
+                orders = client.futures_get_open_orders()
+            return orders
+        except BinanceAPIException as e:
+            logger.error(f"获取挂单失败: {e}")
+            raise
     
     async def get_24hr_ticker(self, symbol: str = None) -> List[dict]:
         """获取24小时价格变化统计
