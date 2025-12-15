@@ -35,11 +35,13 @@ logger = logging.getLogger(__name__)
 
 class TradingEngine:
     """交易引擎 - 核心交易逻辑"""
-    
+
     def __init__(self):
         self._running = False
         self._kline_cache: dict = {}  # {symbol: [klines]}
         self._amplitude_check_task = None
+        self._analysis_count: dict = {}  # {symbol: count} 策略分析计数
+        self._log_interval = 10  # 每10次分析输出一次汇总日志
     
     async def on_kline(self, kline: KlineData):
         """处理K线数据回调"""
@@ -102,7 +104,14 @@ class TradingEngine:
             signal = strategy.analyze(symbol, self._kline_cache[symbol])
             
             if signal.signal_type == SignalType.NONE:
-                logger.debug(f"{symbol}: {signal.message}")
+                # 更新分析计数
+                if symbol not in self._analysis_count:
+                    self._analysis_count[symbol] = 0
+                self._analysis_count[symbol] += 1
+
+                # 每N次分析输出一次汇总日志，避免刷屏
+                if self._analysis_count[symbol] % self._log_interval == 1:
+                    logger.info(f"[{symbol}] 策略分析第{self._analysis_count[symbol]}次: {signal.message} | EMA快={signal.ema_fast:.6f}, EMA慢={signal.ema_slow:.6f}")
                 return
             
             logger.info(f"[{symbol}] 检测到交易信号: {signal.signal_type.value}, {signal.message}")
