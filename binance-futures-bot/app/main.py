@@ -292,10 +292,11 @@ async def subscribe_active_pairs():
             await binance_ws.subscribe(pair.symbol, pair.strategy_interval)
             # 预加载K线数据
             try:
+                # 高级策略需要至少241根K线 (EMA200 + lookback25 + ADX14 + 2)
                 klines = await binance_api.get_klines(
                     symbol=pair.symbol,
                     interval=pair.strategy_interval,
-                    limit=200
+                    limit=300
                 )
                 trading_engine._kline_cache[pair.symbol] = klines
             except Exception as e:
@@ -334,9 +335,14 @@ async def lifespan(app: FastAPI):
     
     # 启动移动止损管理器
     await trailing_stop_manager.start()
+    logger.info("移动止损管理器启动完成")
 
     # 启动止损订单守护
-    await stop_loss_guard.start()
+    try:
+        await stop_loss_guard.start()
+        logger.info("止损守护服务启动完成")
+    except Exception as e:
+        logger.error(f"止损守护服务启动失败: {e}")
 
     # 启动24小时涨跌幅监控（无需TG配置，直接调用币安API）
     await oi_monitor.start(check_interval=300)  # 每5分钟检查一次
