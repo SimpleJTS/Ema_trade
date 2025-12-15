@@ -406,24 +406,19 @@ class BinanceAPI:
             raise
     
     async def get_open_orders(self, symbol: str = None) -> List[dict]:
-        """获取当前挂单（使用python-binance库）"""
-        client = self._get_binance_client()
+        """获取当前挂单（使用直接API请求）"""
+        params = {}
+        if symbol:
+            params["symbol"] = symbol
         try:
-            logger.debug(f"[{symbol or 'ALL'}] 正在查询挂单...")
-            if symbol:
-                orders = client.futures_get_open_orders(symbol=symbol)
-            else:
-                orders = client.futures_get_open_orders()
+            orders = await self._request("GET", "/fapi/v1/openOrders", params, signed=True)
             # 调试日志
             if orders:
                 order_types = [f"{o.get('type')}(ID:{o.get('orderId')})" for o in orders]
                 logger.info(f"[{symbol or 'ALL'}] 获取到{len(orders)}个挂单: {order_types}")
             else:
-                logger.debug(f"[{symbol or 'ALL'}] 查询结果: 无挂单 (orders={orders})")
+                logger.debug(f"[{symbol or 'ALL'}] 查询结果: 无挂单")
             return orders if orders else []
-        except BinanceAPIException as e:
-            logger.error(f"[{symbol or 'ALL'}] 获取挂单失败: {e}")
-            raise
         except Exception as e:
             logger.error(f"[{symbol or 'ALL'}] 获取挂单异常: {type(e).__name__}: {e}")
             raise
