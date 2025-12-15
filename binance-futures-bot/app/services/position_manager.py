@@ -269,6 +269,38 @@ class PositionManager:
             position.remaining_quantity = remaining_quantity
             position.quantity = remaining_quantity
 
+            # 部分平仓后，需要更新止损订单的数量为剩余数量
+            # 如果止损订单存在，需要取消并重新下单
+            if position.stop_loss_order_id:
+                try:
+                    # 取消原止损单
+                    await binance_api.cancel_order(symbol, position.stop_loss_order_id)
+                    logger.info(f"[{symbol}] 部分平仓后已取消原止损单: {position.stop_loss_order_id}")
+                    
+                    # 重新下止损单（使用剩余数量）
+                    stop_side = "SELL" if position.side == "LONG" else "BUY"
+                    stop_order = await binance_api.place_stop_loss_order(
+                        symbol=symbol,
+                        side=stop_side,
+                        quantity=remaining_quantity,
+                        stop_price=position.stop_loss_price
+                    )
+                    
+                    # 更新止损单ID
+                    new_order_id = str(stop_order.get("orderId", ""))
+                    await session.execute(
+                        update(Position)
+                        .where(Position.id == position.id)
+                        .values(stop_loss_order_id=new_order_id)
+                    )
+                    await session.commit()
+                    position.stop_loss_order_id = new_order_id
+                    
+                    logger.info(f"[{symbol}] 部分平仓后已更新止损单数量: 新订单ID={new_order_id}, 数量={remaining_quantity}")
+                except Exception as e:
+                    logger.error(f"[{symbol}] 部分平仓后更新止损单失败: {e}")
+                    # 不抛出异常，因为部分平仓已经成功，止损单可以在守护线程中修复
+
             # 记录交易日志
             trade_log = TradeLog(
                 symbol=symbol,
