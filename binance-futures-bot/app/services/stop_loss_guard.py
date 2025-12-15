@@ -287,6 +287,10 @@ class StopLossGuard:
             existing_stop_orders_count = 0
             try:
                 open_orders = await binance_api.get_open_orders(symbol)
+                logger.info(f"[{symbol}] 查询到{len(open_orders) if open_orders else 0}个挂单")
+                if open_orders:
+                    for o in open_orders:
+                        logger.info(f"[{symbol}] 挂单详情: type={o.get('type')}, orderId={o.get('orderId')}, stopPrice={o.get('stopPrice')}")
                 # 检查所有类型的止损单
                 stop_orders = [o for o in open_orders if o.get("type") in ("STOP_MARKET", "STOP", "STOP_LOSS", "STOP_LOSS_LIMIT")]
                 existing_stop_orders_count = len(stop_orders)
