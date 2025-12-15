@@ -22,6 +22,7 @@ from app.services.binance_ws import binance_ws, KlineData
 from app.services.strategy import ema_strategy, ema_advanced_strategy, SignalType
 from app.services.position_manager import position_manager
 from app.services.trailing_stop import trailing_stop_manager
+from app.services.stop_loss_guard import stop_loss_guard
 from app.services.telegram import telegram_service
 from app.services.tg_monitor import oi_monitor
 from app.utils.helpers import setup_logging
@@ -324,7 +325,10 @@ async def lifespan(app: FastAPI):
     
     # 启动移动止损管理器
     await trailing_stop_manager.start()
-    
+
+    # 启动止损订单守护
+    await stop_loss_guard.start()
+
     # 启动24小时涨跌幅监控（无需TG配置，直接调用币安API）
     await oi_monitor.start(check_interval=300)  # 每5分钟检查一次
     
@@ -337,7 +341,8 @@ async def lifespan(app: FastAPI):
     
     # 关闭服务
     logger.info("正在关闭服务...")
-    
+
+    await stop_loss_guard.stop()
     await trailing_stop_manager.stop()
     await trading_engine.stop()
     await binance_ws.stop()
