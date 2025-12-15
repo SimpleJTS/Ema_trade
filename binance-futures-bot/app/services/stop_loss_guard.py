@@ -241,22 +241,35 @@ class StopLossGuard:
 
     async def _check_loop(self):
         """止损守护检查循环"""
+        logger.info("止损守护检查循环已启动")
+        check_count = 0
+
         while self._running:
             try:
                 positions = position_manager.get_all_positions()
+                open_positions = [p for p in positions if p.status == "OPEN"]
+                check_count += 1
 
-                for position in positions:
-                    if position.status != "OPEN":
-                        continue
+                if open_positions:
+                    logger.info(f"[止损守护] 第{check_count}次检查，共{len(open_positions)}个持仓")
 
-                    result = await self._check_and_fix_stop_loss(position)
-                    self._last_check_results[position.symbol] = result
+                    for position in open_positions:
+                        result = await self._check_and_fix_stop_loss(position)
+                        self._last_check_results[position.symbol] = result
 
-                    if result['status'] == 'fixed':
-                        logger.info(f"[{position.symbol}] 止损守护: {result['message']}")
+                        if result['status'] == 'ok':
+                            logger.info(f"[{position.symbol}] 止损单检查通过: {result['message']}")
+                        elif result['status'] == 'fixed':
+                            logger.info(f"[{position.symbol}] 止损守护已修复: {result['message']}")
+                        else:
+                            logger.warning(f"[{position.symbol}] 止损守护检查异常: {result['message']}")
 
-                    # 每个检查间隔1秒，避免API限频
-                    await asyncio.sleep(1)
+                        # 每个检查间隔1秒，避免API限频
+                        await asyncio.sleep(1)
+                else:
+                    # 每10次检查输出一次"无持仓"日志，避免刷屏
+                    if check_count % 10 == 1:
+                        logger.info(f"[止损守护] 第{check_count}次检查，当前无持仓")
 
                 await asyncio.sleep(self._check_interval)
 
