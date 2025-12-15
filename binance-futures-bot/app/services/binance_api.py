@@ -344,7 +344,7 @@ class BinanceAPI:
             "side": side,
             "type": "STOP_MARKET",
             "stopPrice": formatted_price,
-            "timeInForce": "GTE_GTC"
+            "workingType": "MARK_PRICE"  # 使用标记价格触发，避免插针
         }
         
         if close_position:
