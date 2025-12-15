@@ -12,8 +12,8 @@ import hashlib
 import time
 from urllib.parse import urlencode
 
-from binance.um_futures import UMFutures
-from binance.error import ClientError
+from binance.client import Client
+from binance.exceptions import BinanceAPIException
 
 from app.config import settings
 
@@ -22,20 +22,22 @@ logger = logging.getLogger(__name__)
 
 class BinanceAPI:
     """币安期货API客户端"""
-    
+
     BASE_URL = "https://fapi.binance.com"
     TESTNET_URL = "https://testnet.binancefuture.com"
-    
+
     def __init__(self):
         self._exchange_info: Dict = {}
         self._symbol_info: Dict[str, Dict] = {}
         self._client: Optional[httpx.AsyncClient] = None
-        self._um_futures: Optional[UMFutures] = None
+        self._binance_client: Optional[Client] = None
 
-    def _get_um_futures(self) -> UMFutures:
-        """获取币安官方SDK客户端（每次调用都创建新实例以获取最新配置）"""
-        base_url = self.TESTNET_URL if settings.BINANCE_TESTNET else self.BASE_URL
-        return UMFutures(key=self.api_key, secret=self.api_secret, base_url=base_url)
+    def _get_binance_client(self) -> Client:
+        """获取python-binance客户端（每次调用都创建新实例以获取最新配置）"""
+        client = Client(self.api_key, self.api_secret)
+        if settings.BINANCE_TESTNET:
+            client.FUTURES_URL = self.TESTNET_URL
+        return client
     
     @property
     def api_key(self) -> str:
@@ -331,7 +333,7 @@ class BinanceAPI:
     
     async def place_stop_loss_order(self, symbol: str, side: str, quantity: float,
                                      stop_price: float, close_position: bool = False) -> dict:
-        """下止损单（使用币安官方SDK）
+        """下止损单（使用python-binance库的futures_create_order）
 
         Args:
             symbol: 交易对
@@ -350,19 +352,19 @@ class BinanceAPI:
 
         side_desc = "买入止损" if side == "BUY" else "卖出止损"
 
-        # 使用官方SDK下单
-        um_futures = self._get_um_futures()
+        # 使用python-binance库下单
+        client = self._get_binance_client()
 
         try:
             if close_position:
                 # 全仓平仓模式
-                logger.info(f"[{symbol}] 提交止损单(SDK): {side_desc}, 触发价={formatted_price}, 全仓平仓")
-                result = um_futures.new_order(
+                logger.info(f"[{symbol}] 提交止损单: {side_desc}, 触发价={formatted_price}, 全仓平仓")
+                result = client.futures_create_order(
                     symbol=symbol,
                     side=side,
                     type="STOP_MARKET",
                     stopPrice=formatted_price,
-                    closePosition="true",
+                    closePosition=True,
                     workingType="MARK_PRICE"
                 )
             else:
@@ -375,22 +377,22 @@ class BinanceAPI:
                 if Decimal(formatted_qty) < min_qty:
                     raise ValueError(f"下单数量 {formatted_qty} 小于最小值 {min_qty}")
 
-                logger.info(f"[{symbol}] 提交止损单(SDK): {side_desc}, 触发价={formatted_price}, 数量={formatted_qty}")
-                result = um_futures.new_order(
+                logger.info(f"[{symbol}] 提交止损单: {side_desc}, 触发价={formatted_price}, 数量={formatted_qty}")
+                result = client.futures_create_order(
                     symbol=symbol,
                     side=side,
                     type="STOP_MARKET",
                     quantity=formatted_qty,
                     stopPrice=formatted_price,
-                    reduceOnly="true",
+                    reduceOnly=True,
                     workingType="MARK_PRICE"
                 )
 
             logger.info(f"[{symbol}] 止损单下单成功: 订单ID={result.get('orderId')}")
             return result
 
-        except ClientError as e:
-            logger.error(f"[{symbol}] 止损单下单失败(SDK): 错误码={e.error_code}, 错误信息={e.error_message}")
+        except BinanceAPIException as e:
+            logger.error(f"[{symbol}] 止损单下单失败: 错误码={e.code}, 错误信息={e.message}")
             raise
         except Exception as e:
             logger.error(f"[{symbol}] 止损单下单异常: {e}")
