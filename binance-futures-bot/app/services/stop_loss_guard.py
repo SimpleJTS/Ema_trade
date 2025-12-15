@@ -281,37 +281,40 @@ class StopLossGuard:
             parsed_pos = self._parse_position_data(position_data)
             symbol = parsed_pos['symbol']
             current_price = parsed_pos['mark_price']
-            
+
             # 获取当前止损单价格（如果有）
             current_stop_price = None
+            existing_stop_orders_count = 0
             try:
                 open_orders = await binance_api.get_open_orders(symbol)
-                stop_orders = [o for o in open_orders if o.get("type") in ("STOP_MARKET", "STOP")]
+                # 检查所有类型的止损单
+                stop_orders = [o for o in open_orders if o.get("type") in ("STOP_MARKET", "STOP", "STOP_LOSS", "STOP_LOSS_LIMIT")]
+                existing_stop_orders_count = len(stop_orders)
                 if stop_orders:
                     current_stop_price = float(stop_orders[0].get("stopPrice", 0))
+                    logger.info(f"[{symbol}] 检测到{len(stop_orders)}个止损单, 当前止损价={current_stop_price}")
             except Exception as e:
                 logger.warning(f"[{symbol}] 检查当前止损单失败: {e}")
-            
-            # 计算止损价格（传入当前止损价格用于追踪止损比较）
-            new_stop_price = self._calculate_stop_loss_price(parsed_pos, current_price, current_stop_price)
-            
-            if new_stop_price is None:
-                # 不需要调整止损
-                logger.debug(f"[{symbol}] 当前盈利未达到调整止损的条件")
-                return
-            
-            # 如果当前有止损单，检查是否需要调整
-            if current_stop_price is not None:
+
+            # 如果已经有止损单，不再重复下单（除非价格需要调整）
+            if existing_stop_orders_count > 0 and current_stop_price is not None:
+                # 计算止损价格
+                new_stop_price = self._calculate_stop_loss_price(parsed_pos, current_price, current_stop_price)
+
+                if new_stop_price is None:
+                    logger.debug(f"[{symbol}] 当前盈利未达到调整止损的条件，保持现有止损单")
+                    return
+
                 # 获取精度信息用于比较
                 precision_info = await binance_api.get_symbol_precision(symbol)
                 formatted_current = binance_api.format_price(current_stop_price, precision_info)
                 formatted_new = binance_api.format_price(new_stop_price, precision_info)
-                
+
                 # 如果新止损价格与当前相同，不需要调整
                 if formatted_current == formatted_new:
-                    logger.debug(f"[{symbol}] 止损价格未变化，跳过调整")
+                    logger.debug(f"[{symbol}] 止损价格未变化({formatted_current})，跳过调整")
                     return
-                
+
                 # 检查是否需要调整（做多时新止损应该更高，做空时新止损应该更低）
                 if parsed_pos['side'] == "LONG":
                     if new_stop_price <= current_stop_price:
@@ -321,14 +324,28 @@ class StopLossGuard:
                     if new_stop_price >= current_stop_price:
                         logger.debug(f"[{symbol}] 新止损价格({new_stop_price})不低于当前止损({current_stop_price})，跳过调整")
                         return
-            
-            # 调整止损
-            await self._adjust_stop_loss(
-                symbol=symbol,
-                side=parsed_pos['side'],
-                quantity=parsed_pos['quantity'],
-                stop_price=new_stop_price
-            )
+
+                # 需要调整止损
+                logger.info(f"[{symbol}] 需要调整止损: {current_stop_price} -> {new_stop_price}")
+                await self._adjust_stop_loss(
+                    symbol=symbol,
+                    side=parsed_pos['side'],
+                    quantity=parsed_pos['quantity'],
+                    stop_price=new_stop_price
+                )
+            else:
+                # 没有止损单，检查是否需要创建
+                new_stop_price = self._calculate_stop_loss_price(parsed_pos, current_price, None)
+                if new_stop_price is not None:
+                    logger.info(f"[{symbol}] 未检测到止损单，创建新止损: {new_stop_price}")
+                    await self._adjust_stop_loss(
+                        symbol=symbol,
+                        side=parsed_pos['side'],
+                        quantity=parsed_pos['quantity'],
+                        stop_price=new_stop_price
+                    )
+                else:
+                    logger.debug(f"[{symbol}] 未检测到止损单，但当前盈利未达到设置止损的条件")
             
         except Exception as e:
             logger.error(f"处理持仓失败: {e}")
