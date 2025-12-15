@@ -292,10 +292,11 @@ async def subscribe_active_pairs():
             await binance_ws.subscribe(pair.symbol, pair.strategy_interval)
             # 预加载K线数据
             try:
+                # 高级策略需要至少241根K线 (EMA200 + lookback25 + ADX14 + 2)
                 klines = await binance_api.get_klines(
                     symbol=pair.symbol,
                     interval=pair.strategy_interval,
-                    limit=200
+                    limit=300
                 )
                 trading_engine._kline_cache[pair.symbol] = klines
             except Exception as e:
