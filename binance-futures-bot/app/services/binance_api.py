@@ -494,7 +494,7 @@ class BinanceAPI:
                 order_types = []
                 for o in all_orders:
                     order_id = o.get('algoId') or o.get('orderId', 'N/A')
-                    order_type = o.get('type', 'UNKNOWN')
+                    order_type = o.get('orderType') or o.get('type', 'N/A')
                     order_types.append(f"{order_type}(ID:{order_id})")
                 logger.info(f"[{symbol or 'ALL'}] 总共获取到{len(all_orders)}个挂单: {order_types}")
             else:

@@ -233,8 +233,7 @@ class StopLossGuard:
             # 取消所有现有止损单（算法订单使用algoId，普通订单使用orderId）
             try:
                 open_orders = await binance_api.get_open_orders(symbol)
-                stop_orders = [o for o in open_orders if o.get("type") in ("STOP_MARKET", "STOP")]
-                for order in stop_orders:
+                for order in open_orders:
                     try:
                         # 算法订单使用algoId，普通订单使用orderId
                         order_id = order.get("algoId") or order.get("orderId")
