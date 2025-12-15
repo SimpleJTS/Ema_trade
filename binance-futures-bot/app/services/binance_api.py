@@ -12,6 +12,9 @@ import hashlib
 import time
 from urllib.parse import urlencode
 
+from binance.um_futures import UMFutures
+from binance.error import ClientError
+
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -27,6 +30,12 @@ class BinanceAPI:
         self._exchange_info: Dict = {}
         self._symbol_info: Dict[str, Dict] = {}
         self._client: Optional[httpx.AsyncClient] = None
+        self._um_futures: Optional[UMFutures] = None
+
+    def _get_um_futures(self) -> UMFutures:
+        """获取币安官方SDK客户端（每次调用都创建新实例以获取最新配置）"""
+        base_url = self.TESTNET_URL if settings.BINANCE_TESTNET else self.BASE_URL
+        return UMFutures(key=self.api_key, secret=self.api_secret, base_url=base_url)
     
     @property
     def api_key(self) -> str:
@@ -322,7 +331,7 @@ class BinanceAPI:
     
     async def place_stop_loss_order(self, symbol: str, side: str, quantity: float,
                                      stop_price: float, close_position: bool = False) -> dict:
-        """下止损单（使用限价止损STOP类型）
+        """下止损单（使用币安官方SDK）
 
         Args:
             symbol: 交易对
@@ -339,45 +348,53 @@ class BinanceAPI:
         if Decimal(formatted_price) <= 0:
             raise ValueError(f"无效的止损价格: {stop_price} -> {formatted_price} (tick_size={precision_info['tick_size']})")
 
-        # 计算限价：止损触发后的限价单价格
-        # 为了确保成交，给一定滑点空间
-        stop_price_float = float(formatted_price)
-        if side == "SELL":
-            # 卖出止损（多头平仓），限价设置比止损价低0.5%
-            limit_price = stop_price_float * 0.995
-        else:
-            # 买入止损（空头平仓），限价设置比止损价高0.5%
-            limit_price = stop_price_float * 1.005
-        formatted_limit_price = self.format_price(limit_price, precision_info)
-
-        params = {
-            "symbol": symbol,
-            "side": side,
-            "type": "STOP",  # 使用限价止损而非市价止损
-            "stopPrice": formatted_price,
-            "price": formatted_limit_price,
-            "workingType": "MARK_PRICE",  # 使用标记价格触发，避免插针
-            "timeInForce": "GTC"  # Good Till Cancel
-        }
-
-        if close_position:
-            params["closePosition"] = "true"
-        else:
-            # 格式化数量
-            formatted_qty = self.format_quantity(quantity, precision_info)
-            min_qty = Decimal(precision_info['min_qty'])
-
-            if Decimal(formatted_qty) <= 0:
-                raise ValueError(f"无效的下单数量: {quantity} -> {formatted_qty} (step_size={precision_info['step_size']})")
-            if Decimal(formatted_qty) < min_qty:
-                raise ValueError(f"下单数量 {formatted_qty} 小于最小值 {min_qty}")
-
-            params["quantity"] = formatted_qty
-            params["reduceOnly"] = "true"
-
         side_desc = "买入止损" if side == "BUY" else "卖出止损"
-        logger.info(f"[{symbol}] 提交止损单: {side_desc}, 触发价={formatted_price}, 限价={formatted_limit_price}, 数量={params.get('quantity', '全仓')}")
-        return await self._request("POST", "/fapi/v1/order", params, signed=True)
+
+        # 使用官方SDK下单
+        um_futures = self._get_um_futures()
+
+        try:
+            if close_position:
+                # 全仓平仓模式
+                logger.info(f"[{symbol}] 提交止损单(SDK): {side_desc}, 触发价={formatted_price}, 全仓平仓")
+                result = um_futures.new_order(
+                    symbol=symbol,
+                    side=side,
+                    type="STOP_MARKET",
+                    stopPrice=formatted_price,
+                    closePosition="true",
+                    workingType="MARK_PRICE"
+                )
+            else:
+                # 指定数量模式
+                formatted_qty = self.format_quantity(quantity, precision_info)
+                min_qty = Decimal(precision_info['min_qty'])
+
+                if Decimal(formatted_qty) <= 0:
+                    raise ValueError(f"无效的下单数量: {quantity} -> {formatted_qty} (step_size={precision_info['step_size']})")
+                if Decimal(formatted_qty) < min_qty:
+                    raise ValueError(f"下单数量 {formatted_qty} 小于最小值 {min_qty}")
+
+                logger.info(f"[{symbol}] 提交止损单(SDK): {side_desc}, 触发价={formatted_price}, 数量={formatted_qty}")
+                result = um_futures.new_order(
+                    symbol=symbol,
+                    side=side,
+                    type="STOP_MARKET",
+                    quantity=formatted_qty,
+                    stopPrice=formatted_price,
+                    reduceOnly="true",
+                    workingType="MARK_PRICE"
+                )
+
+            logger.info(f"[{symbol}] 止损单下单成功: 订单ID={result.get('orderId')}")
+            return result
+
+        except ClientError as e:
+            logger.error(f"[{symbol}] 止损单下单失败(SDK): 错误码={e.error_code}, 错误信息={e.error_message}")
+            raise
+        except Exception as e:
+            logger.error(f"[{symbol}] 止损单下单异常: {e}")
+            raise
     
     async def cancel_order(self, symbol: str, order_id: str) -> dict:
         """取消订单"""
