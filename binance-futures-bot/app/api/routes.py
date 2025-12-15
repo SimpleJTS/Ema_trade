@@ -22,6 +22,7 @@ from app.config import settings, config_manager
 from app.services.binance_api import binance_api
 from app.services.binance_ws import binance_ws
 from app.services.position_manager import position_manager
+from app.services.stop_loss_guard import stop_loss_guard
 from app.services.telegram import telegram_service
 from app.utils.encryption import encrypt, encryption_manager
 
@@ -789,4 +790,35 @@ async def get_pnl_symbols():
         return {"symbols": sorted(list(symbols))}
     except Exception as e:
         logger.error(f"获取交易对列表失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ========== Stop Loss Guard ==========
+
+@router.get("/stop-loss-guard/check")
+async def check_stop_loss_orders():
+    """手动检查所有持仓的止损订单状态"""
+    try:
+        results = await stop_loss_guard.check_all_positions()
+        return {
+            "success": True,
+            "message": f"已检查 {len(results)} 个持仓",
+            "results": results
+        }
+    except Exception as e:
+        logger.error(f"止损守护检查失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/stop-loss-guard/interval")
+async def set_stop_loss_guard_interval(interval: int = Query(..., ge=10, le=300, description="检查间隔(秒)")):
+    """设置止损守护检查间隔"""
+    try:
+        stop_loss_guard.set_check_interval(interval)
+        return MessageResponse(
+            success=True,
+            message=f"止损守护检查间隔已设置为 {interval} 秒"
+        )
+    except Exception as e:
+        logger.error(f"设置止损守护间隔失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
