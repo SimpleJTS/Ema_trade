@@ -413,6 +413,10 @@ class BinanceAPI:
                 orders = client.futures_get_open_orders(symbol=symbol)
             else:
                 orders = client.futures_get_open_orders()
+            # 调试日志：显示返回的订单类型
+            if orders:
+                order_types = [f"{o.get('type')}(ID:{o.get('orderId')})" for o in orders]
+                logger.info(f"[{symbol or 'ALL'}] 获取到{len(orders)}个挂单: {order_types}")
             return orders
         except BinanceAPIException as e:
             logger.error(f"获取挂单失败: {e}")
