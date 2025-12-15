@@ -12,6 +12,9 @@ import hashlib
 import time
 from urllib.parse import urlencode
 
+from binance.client import Client
+from binance.exceptions import BinanceAPIException
+
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -19,14 +22,22 @@ logger = logging.getLogger(__name__)
 
 class BinanceAPI:
     """币安期货API客户端"""
-    
+
     BASE_URL = "https://fapi.binance.com"
     TESTNET_URL = "https://testnet.binancefuture.com"
-    
+
     def __init__(self):
         self._exchange_info: Dict = {}
         self._symbol_info: Dict[str, Dict] = {}
         self._client: Optional[httpx.AsyncClient] = None
+        self._binance_client: Optional[Client] = None
+
+    def _get_binance_client(self) -> Client:
+        """获取python-binance客户端（每次调用都创建新实例以获取最新配置）"""
+        client = Client(self.api_key, self.api_secret)
+        if settings.BINANCE_TESTNET:
+            client.FUTURES_URL = self.TESTNET_URL
+        return client
     
     @property
     def api_key(self) -> str:
@@ -322,8 +333,8 @@ class BinanceAPI:
     
     async def place_stop_loss_order(self, symbol: str, side: str, quantity: float,
                                      stop_price: float, close_position: bool = False) -> dict:
-        """下止损单
-        
+        """下止损单（使用python-binance库的futures_create_order）
+
         Args:
             symbol: 交易对
             side: BUY(空头止损)/SELL(多头止损)
@@ -333,38 +344,59 @@ class BinanceAPI:
         """
         # 获取精度信息
         precision_info = await self.get_symbol_precision(symbol)
-        
+
         # 格式化止损价格
         formatted_price = self.format_price(stop_price, precision_info)
         if Decimal(formatted_price) <= 0:
             raise ValueError(f"无效的止损价格: {stop_price} -> {formatted_price} (tick_size={precision_info['tick_size']})")
-        
-        params = {
-            "symbol": symbol,
-            "side": side,
-            "type": "STOP_MARKET",
-            "stopPrice": formatted_price,
-            "workingType": "MARK_PRICE"  # 使用标记价格触发，避免插针
-        }
-        
-        if close_position:
-            params["closePosition"] = "true"
-        else:
-            # 格式化数量
-            formatted_qty = self.format_quantity(quantity, precision_info)
-            min_qty = Decimal(precision_info['min_qty'])
-            
-            if Decimal(formatted_qty) <= 0:
-                raise ValueError(f"无效的下单数量: {quantity} -> {formatted_qty} (step_size={precision_info['step_size']})")
-            if Decimal(formatted_qty) < min_qty:
-                raise ValueError(f"下单数量 {formatted_qty} 小于最小值 {min_qty}")
-            
-            params["quantity"] = formatted_qty
-            params["reduceOnly"] = "true"
-        
+
         side_desc = "买入止损" if side == "BUY" else "卖出止损"
-        logger.info(f"[{symbol}] 提交止损单: {side_desc}, 触发价={formatted_price}, 数量={params.get('quantity', '全仓')}")
-        return await self._request("POST", "/fapi/v1/order", params, signed=True)
+
+        # 使用python-binance库下单
+        client = self._get_binance_client()
+
+        try:
+            if close_position:
+                # 全仓平仓模式
+                logger.info(f"[{symbol}] 提交止损单: {side_desc}, 触发价={formatted_price}, 全仓平仓")
+                result = client.futures_create_order(
+                    symbol=symbol,
+                    side=side,
+                    type="STOP_MARKET",
+                    stopPrice=formatted_price,
+                    closePosition=True,
+                    workingType="MARK_PRICE"
+                )
+            else:
+                # 指定数量模式
+                formatted_qty = self.format_quantity(quantity, precision_info)
+                min_qty = Decimal(precision_info['min_qty'])
+
+                if Decimal(formatted_qty) <= 0:
+                    raise ValueError(f"无效的下单数量: {quantity} -> {formatted_qty} (step_size={precision_info['step_size']})")
+                if Decimal(formatted_qty) < min_qty:
+                    raise ValueError(f"下单数量 {formatted_qty} 小于最小值 {min_qty}")
+
+                logger.info(f"[{symbol}] 提交止损单: {side_desc}, 触发价={formatted_price}, 数量={formatted_qty}")
+                result = client.futures_create_order(
+                    symbol=symbol,
+                    side=side,
+                    type="STOP_MARKET",
+                    quantity=formatted_qty,
+                    stopPrice=formatted_price,
+                    reduceOnly=True,
+                    workingType="MARK_PRICE"
+                )
+
+            logger.info(f"[{symbol}] 止损单下单成功: 订单ID={result.get('orderId')}")
+            return result
+
+        except BinanceAPIException as e:
+            logger.error(f"[{symbol}] 止损单下单失败: 错误码={e.code}, 错误信息={e.message}")
+            raise
+        except Exception as e:
+            logger.error(f"[{symbol}] 止损单下单异常: {e}")
+            raise
     
     async def cancel_order(self, symbol: str, order_id: str) -> dict:
         """取消订单"""
