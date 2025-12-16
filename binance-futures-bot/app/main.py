@@ -162,7 +162,20 @@ class TradingEngine:
                     for name, cond in signal.conditions.items()
                 ])
             logger.info(f"[{symbol}] 检测到交易信号: {signal.signal_type.value}, {signal.message}{conditions_detail}")
-            
+
+            # 检查总交易开关
+            trading_enabled_config = await session.execute(
+                select(SystemConfig).where(SystemConfig.key == "TRADING_ENABLED")
+            )
+            trading_config = trading_enabled_config.scalar_one_or_none()
+            trading_enabled = True
+            if trading_config and trading_config.value:
+                trading_enabled = trading_config.value.lower() == "true"
+
+            if not trading_enabled:
+                logger.warning(f"[{symbol}] 总交易开关已关闭，跳过新开仓")
+                return
+
             # 计算下单数量
             quantity = await binance_api.calculate_order_quantity(
                 symbol=symbol,
