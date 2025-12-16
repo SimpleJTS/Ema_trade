@@ -398,21 +398,21 @@ class EMAAdvancedStrategy:
                 conditions=conditions
             )
 
-        # 条件2: 检查收盘价与EMA200的关系
+        # 条件2: 检查收盘价与EMA200的关系 [暂时禁用]
         if cross_type == "GOLDEN":
             price_vs_ema200_ok = current_price > current_ema200
             conditions["价格vs EMA200"] = {
-                "pass": price_vs_ema200_ok,
-                "value": f"价格({current_price:.6f}) {'>' if price_vs_ema200_ok else '<='} EMA200({current_ema200:.6f})"
+                "pass": True,  # 暂时禁用此条件，始终通过
+                "value": f"价格({current_price:.6f}) {'>' if price_vs_ema200_ok else '<='} EMA200({current_ema200:.6f}) [已禁用]"
             }
         else:  # DEATH
             price_vs_ema200_ok = current_price < current_ema200
             conditions["价格vs EMA200"] = {
-                "pass": price_vs_ema200_ok,
-                "value": f"价格({current_price:.6f}) {'<' if price_vs_ema200_ok else '>='} EMA200({current_ema200:.6f})"
+                "pass": True,  # 暂时禁用此条件，始终通过
+                "value": f"价格({current_price:.6f}) {'<' if price_vs_ema200_ok else '>='} EMA200({current_ema200:.6f}) [已禁用]"
             }
 
-        # 条件3: 计算ADX并检查是否≥25
+        # 条件3: 计算ADX并检查是否≥25 [暂时禁用]
         adx_values, plus_di, minus_di = technical_indicators.calculate_adx(klines, self.adx_period)
         current_adx = 0
         adx_ok = False
@@ -420,8 +420,8 @@ class EMAAdvancedStrategy:
             current_adx = adx_values[-1]
             adx_ok = current_adx >= self.adx_threshold
         conditions["ADX强度"] = {
-            "pass": adx_ok,
-            "value": f"ADX({current_adx:.2f}) {'>=' if adx_ok else '<'} {self.adx_threshold}"
+            "pass": True,  # 暂时禁用此条件，始终通过
+            "value": f"ADX({current_adx:.2f}) {'>=' if adx_ok else '<'} {self.adx_threshold} [已禁用]"
         }
 
         # 条件4: 检查成交量是否突破
