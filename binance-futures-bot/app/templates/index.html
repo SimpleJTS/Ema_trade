@@ -468,6 +468,13 @@
                 <div class="status-item">
                     <span id="balance-display">-- USDT</span>
                 </div>
+                <div class="status-item" style="gap: 12px;">
+                    <span>总交易开关</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="trading-enabled-toggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
             </div>
         </header>
 
@@ -1825,6 +1832,33 @@
             loadPnLAnalysis();
         }
 
+        // Trading Control
+        async function loadTradingEnabled() {
+            try {
+                const data = await apiCall('/config/trading-enabled');
+                const toggle = document.getElementById('trading-enabled-toggle');
+                toggle.checked = data.enabled;
+            } catch (error) {
+                console.error('加载总交易开关状态失败:', error);
+            }
+        }
+
+        async function setTradingEnabled(enabled) {
+            try {
+                const result = await apiCall('/config/trading-enabled?enabled=' + enabled, 'POST');
+                showToast(result.message, 'success');
+            } catch (error) {
+                showToast('设置总交易开关失败: ' + error.message, 'error');
+                // 恢复开关状态
+                loadTradingEnabled();
+            }
+        }
+
+        // 总交易开关事件监听
+        document.getElementById('trading-enabled-toggle').addEventListener('change', async (e) => {
+            await setTradingEnabled(e.target.checked);
+        });
+
         // Initial load
         loadPairs();
         loadWsStatus();
@@ -1833,6 +1867,7 @@
         loadStopLossLogs();
         loadTrailingStopConfig();
         loadTGMonitorConfig();
+        loadTradingEnabled();
         initPnLAnalysis();
 
         // Refresh periodically

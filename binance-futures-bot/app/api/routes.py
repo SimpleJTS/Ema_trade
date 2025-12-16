@@ -583,6 +583,64 @@ async def update_tg_monitor_config(data: TGMonitorConfigUpdate):
         await session.close()
 
 
+# ========== Trading Control ==========
+
+@router.get("/config/trading-enabled")
+async def get_trading_enabled():
+    """获取总交易开关状态"""
+    session = await DatabaseManager.get_session()
+    try:
+        result = await session.execute(
+            select(SystemConfig).where(SystemConfig.key == "TRADING_ENABLED")
+        )
+        config = result.scalar_one_or_none()
+
+        # 默认为True（开启交易）
+        enabled = True
+        if config and config.value:
+            enabled = config.value.lower() == "true"
+
+        return {"enabled": enabled}
+    finally:
+        await session.close()
+
+
+@router.post("/config/trading-enabled", response_model=MessageResponse)
+async def set_trading_enabled(enabled: bool):
+    """设置总交易开关"""
+    session = await DatabaseManager.get_session()
+    try:
+        result = await session.execute(
+            select(SystemConfig).where(SystemConfig.key == "TRADING_ENABLED")
+        )
+        config = result.scalar_one_or_none()
+
+        if config:
+            config.value = str(enabled)
+        else:
+            config = SystemConfig(
+                key="TRADING_ENABLED",
+                value=str(enabled),
+                description="总交易开关 - 控制是否允许新开仓"
+            )
+            session.add(config)
+
+        await session.commit()
+
+        status = "已开启" if enabled else "已关闭"
+        logger.info(f"总交易开关{status}")
+
+        return MessageResponse(
+            success=True,
+            message=f"总交易开关{status}，{'可以' if enabled else '不可以'}新开仓"
+        )
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        await session.close()
+
+
 # ========== PnL Analysis ==========
 
 @router.get("/pnl/analysis", response_model=PnLAnalysisResponse)
