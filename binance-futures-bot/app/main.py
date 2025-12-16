@@ -144,10 +144,24 @@ class TradingEngine:
 
                 # 每N次分析输出一次汇总日志，避免刷屏
                 if self._analysis_count[symbol] % self._log_interval == 1:
-                    logger.info(f"[{symbol}] 策略分析第{self._analysis_count[symbol]}次: {signal.message} | EMA快={signal.ema_fast:.6f}, EMA慢={signal.ema_slow:.6f}")
+                    # 构建条件详情日志
+                    conditions_detail = ""
+                    if signal.conditions:
+                        conditions_detail = " | 条件: " + ", ".join([
+                            f"{name}:{'✓' if cond['pass'] else '✗'}({cond['value']})"
+                            for name, cond in signal.conditions.items()
+                        ])
+                    logger.info(f"[{symbol}] 策略分析第{self._analysis_count[symbol]}次: {signal.message}{conditions_detail}")
                 return
-            
-            logger.info(f"[{symbol}] 检测到交易信号: {signal.signal_type.value}, {signal.message}")
+
+            # 构建开仓信号的条件详情日志
+            conditions_detail = ""
+            if signal.conditions:
+                conditions_detail = " | 条件详情:\n" + "\n".join([
+                    f"  {name}: {'✓' if cond['pass'] else '✗'} {cond['value']}"
+                    for name, cond in signal.conditions.items()
+                ])
+            logger.info(f"[{symbol}] 检测到交易信号: {signal.signal_type.value}, {signal.message}{conditions_detail}")
             
             # 计算下单数量
             quantity = await binance_api.calculate_order_quantity(
