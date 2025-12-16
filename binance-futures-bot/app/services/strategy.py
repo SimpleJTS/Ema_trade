@@ -285,7 +285,7 @@ class EMAAdvancedStrategy:
     def __init__(self, ema_fast: int = 9, ema_medium: int = 72, ema_slow: int = 200,
                  adx_period: int = 14, adx_threshold: float = 25,
                  volume_period: int = 30, volume_multiplier: float = 1.8,
-                 lookback: int = 25, max_crosses: int = 1):
+                 lookback: int = 25, max_crosses: int = 2):
         self.ema_fast = ema_fast
         self.ema_medium = ema_medium
         self.ema_slow = ema_slow
