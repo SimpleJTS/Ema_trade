@@ -39,6 +39,7 @@ class TradingEngine:
     def __init__(self):
         self._running = False
         self._kline_cache: dict = {}  # {symbol: [klines]}
+        self._preloading: set = set()  # 正在预加载K线的交易对集合
         self._amplitude_check_task = None
         self._analysis_count: dict = {}  # {symbol: count} 策略分析计数
         self._log_interval = 10  # 每10次分析输出一次汇总日志
@@ -46,11 +47,43 @@ class TradingEngine:
     async def on_kline(self, kline: KlineData):
         """处理K线数据回调"""
         symbol = kline.symbol
-        
-        # 更新缓存
-        if symbol not in self._kline_cache:
-            self._kline_cache[symbol] = []
-        
+
+        # 更新缓存 - 如果缓存为空，先预加载历史K线
+        if symbol not in self._kline_cache or len(self._kline_cache[symbol]) == 0:
+            # 避免重复预加载
+            if symbol in self._preloading:
+                return
+
+            self._preloading.add(symbol)
+            try:
+                # 获取交易对配置以确定interval
+                session = await DatabaseManager.get_session()
+                try:
+                    result = await session.execute(
+                        select(TradingPair).where(TradingPair.symbol == symbol)
+                    )
+                    pair = result.scalar_one_or_none()
+                    if pair:
+                        try:
+                            # 预加载历史K线数据
+                            logger.info(f"[{symbol}] 检测到K线缓存为空，正在预加载历史数据...")
+                            klines = await binance_api.get_klines(
+                                symbol=symbol,
+                                interval=pair.strategy_interval,
+                                limit=300
+                            )
+                            self._kline_cache[symbol] = klines
+                            logger.info(f"[{symbol}] 成功预加载 {len(klines)} 根K线数据")
+                        except Exception as e:
+                            logger.error(f"[{symbol}] 预加载K线数据失败: {e}")
+                            self._kline_cache[symbol] = []
+                    else:
+                        self._kline_cache[symbol] = []
+                finally:
+                    await session.close()
+            finally:
+                self._preloading.discard(symbol)
+
         # 只有K线收盘时才处理
         if not kline.is_closed:
             return
