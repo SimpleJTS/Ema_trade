@@ -264,25 +264,25 @@ class EMAStrategy:
 
 
 class EMAAdvancedStrategy:
-    """EMA高级交叉策略（EMA9/EMA72/EMA200 + ADX + 成交量）
+    """EMA高级交叉策略（EMA6/EMA51/EMA200 + ADX + 成交量）
 
     规则:
     做多信号（5个条件全满足才开仓）：
-    1. EMA9 上穿 EMA72 且收盘价 > EMA72
+    1. EMA6 上穿 EMA51 且收盘价 > EMA51
     2. 收盘价 > EMA200
     3. ADX(14) ≥ 25
     4. 当前成交量 ≥ 30周期均量 × 1.8
-    5. 前25根K线内仅发生 ≤1 次EMA9/EMA72交叉（最好0次）
+    5. 前25根K线内仅发生 ≤1 次EMA6/EMA51交叉（最好0次）
 
     做空信号（5个条件全满足才开仓）：
-    1. EMA9 下穿 EMA72 且收盘价 < EMA72
+    1. EMA6 下穿 EMA51 且收盘价 < EMA51
     2. 收盘价 < EMA200
     3. ADX(14) ≥ 25
     4. 当前成交量 ≥ 30周期均量 × 1.8
-    5. 前25根K线内仅发生 ≤1 次EMA9/EMA72交叉（最好0次）
+    5. 前25根K线内仅发生 ≤1 次EMA6/EMA51交叉（最好0次）
     """
 
-    def __init__(self, ema_fast: int = 9, ema_medium: int = 72, ema_slow: int = 200,
+    def __init__(self, ema_fast: int = 6, ema_medium: int = 51, ema_slow: int = 200,
                  adx_period: int = 14, adx_threshold: float = 25,
                  volume_period: int = 30, volume_multiplier: float = 1.8,
                  lookback: int = 25, max_crosses: int = 1):
@@ -303,7 +303,7 @@ class EMAAdvancedStrategy:
 
     def detect_cross(self, ema_fast: List[float], ema_medium: List[float],
                      index: int) -> Optional[str]:
-        """检测EMA9和EMA72的交叉"""
+        """检测EMA6和EMA51的交叉"""
         if index < 1 or index >= len(ema_fast) or index >= len(ema_medium):
             return None
 
@@ -322,7 +322,7 @@ class EMAAdvancedStrategy:
 
     def count_crosses(self, ema_fast: List[float], ema_medium: List[float],
                       end_index: int, lookback: int = None) -> int:
-        """统计EMA9和EMA72交叉次数"""
+        """统计EMA6和EMA51交叉次数"""
         if lookback is None:
             lookback = self.lookback
 
@@ -364,35 +364,35 @@ class EMAAdvancedStrategy:
         # 提取收盘价
         close_prices = [float(k[4]) for k in klines]
 
-        # 计算EMA9, EMA72, EMA200
-        ema9 = self.calculate_ema(close_prices, self.ema_fast)
-        ema72 = self.calculate_ema(close_prices, self.ema_medium)
+        # 计算EMA6, EMA51, EMA200
+        ema6 = self.calculate_ema(close_prices, self.ema_fast)
+        ema51 = self.calculate_ema(close_prices, self.ema_medium)
         ema200 = self.calculate_ema(close_prices, self.ema_slow)
 
         # 当前K线索引
         current_index = len(close_prices) - 1
         current_price = close_prices[current_index]
-        current_ema9 = ema9[current_index] if ema9 else 0
-        current_ema72 = ema72[current_index] if ema72 else 0
+        current_ema6 = ema6[current_index] if ema6 else 0
+        current_ema51 = ema51[current_index] if ema51 else 0
         current_ema200 = ema200[current_index] if ema200 else 0
 
         # 初始化条件检测结果
         conditions = {}
 
-        # 条件1: 检测当前K线是否有EMA9/EMA72交叉
-        cross_type = self.detect_cross(ema9, ema72, current_index)
+        # 条件1: 检测当前K线是否有EMA6/EMA51交叉
+        cross_type = self.detect_cross(ema6, ema51, current_index)
         if cross_type == "GOLDEN":
-            conditions["EMA交叉"] = {"pass": True, "value": f"金叉(EMA{self.ema_fast}={current_ema9:.6f} > EMA{self.ema_medium}={current_ema72:.6f})"}
+            conditions["EMA交叉"] = {"pass": True, "value": f"金叉(EMA{self.ema_fast}={current_ema6:.6f} > EMA{self.ema_medium}={current_ema51:.6f})"}
         elif cross_type == "DEATH":
-            conditions["EMA交叉"] = {"pass": True, "value": f"死叉(EMA{self.ema_fast}={current_ema9:.6f} < EMA{self.ema_medium}={current_ema72:.6f})"}
+            conditions["EMA交叉"] = {"pass": True, "value": f"死叉(EMA{self.ema_fast}={current_ema6:.6f} < EMA{self.ema_medium}={current_ema51:.6f})"}
         else:
-            conditions["EMA交叉"] = {"pass": False, "value": f"无交叉(EMA{self.ema_fast}={current_ema9:.6f}, EMA{self.ema_medium}={current_ema72:.6f})"}
+            conditions["EMA交叉"] = {"pass": False, "value": f"无交叉(EMA{self.ema_fast}={current_ema6:.6f}, EMA{self.ema_medium}={current_ema51:.6f})"}
             return StrategySignal(
                 signal_type=SignalType.NONE,
                 symbol=symbol,
                 price=current_price,
-                ema_fast=current_ema9,
-                ema_slow=current_ema72,
+                ema_fast=current_ema6,
+                ema_slow=current_ema51,
                 cross_count=0,
                 message="无EMA交叉信号",
                 conditions=conditions
@@ -438,7 +438,7 @@ class EMAAdvancedStrategy:
         }
 
         # 条件5: 统计前N根K线的交叉次数
-        cross_count = self.count_crosses(ema9, ema72, current_index)
+        cross_count = self.count_crosses(ema6, ema51, current_index)
         cross_count_ok = cross_count <= self.max_crosses
         conditions["交叉频率"] = {
             "pass": cross_count_ok,
@@ -455,8 +455,8 @@ class EMAAdvancedStrategy:
                     signal_type=SignalType.LONG,
                     symbol=symbol,
                     price=current_price,
-                    ema_fast=current_ema9,
-                    ema_slow=current_ema72,
+                    ema_fast=current_ema6,
+                    ema_slow=current_ema51,
                     cross_count=cross_count,
                     message=f"✅ 做多信号! 所有条件满足",
                     conditions=conditions
@@ -466,8 +466,8 @@ class EMAAdvancedStrategy:
                     signal_type=SignalType.SHORT,
                     symbol=symbol,
                     price=current_price,
-                    ema_fast=current_ema9,
-                    ema_slow=current_ema72,
+                    ema_fast=current_ema6,
+                    ema_slow=current_ema51,
                     cross_count=cross_count,
                     message=f"✅ 做空信号! 所有条件满足",
                     conditions=conditions
@@ -479,8 +479,8 @@ class EMAAdvancedStrategy:
                 signal_type=SignalType.NONE,
                 symbol=symbol,
                 price=current_price,
-                ema_fast=current_ema9,
-                ema_slow=current_ema72,
+                ema_fast=current_ema6,
+                ema_slow=current_ema51,
                 cross_count=cross_count,
                 message=f"❌ 条件不满足: {', '.join(failed_conditions)}",
                 conditions=conditions
@@ -489,4 +489,4 @@ class EMAAdvancedStrategy:
 
 # 全局策略实例
 ema_strategy = EMAStrategy()  # 基础策略（EMA6/EMA51）
-ema_advanced_strategy = EMAAdvancedStrategy()  # 高级策略（EMA9/EMA72/EMA200）
+ema_advanced_strategy = EMAAdvancedStrategy()  # 高级策略（EMA6/EMA51/EMA200）
