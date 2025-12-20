@@ -311,7 +311,32 @@ class StopLossGuard:
             # 解析持仓数据
             parsed_pos = self._parse_position_data(position_data)
             symbol = parsed_pos['symbol']
+            quantity = parsed_pos['quantity']
             current_price = parsed_pos['mark_price']
+
+            # 如果持仓数量为0，清理该币种的所有挂单并返回
+            if quantity == 0:
+                logger.info(f"[{symbol}] 检测到持仓数量为0，清理该币种的所有挂单")
+                try:
+                    open_orders = await binance_api.get_open_orders(symbol)
+                    if open_orders:
+                        stop_orders = [o for o in open_orders if (o.get("type") or o.get("orderType")) in ("STOP_MARKET", "STOP", "STOP_LOSS", "STOP_LOSS_LIMIT")]
+                        for order in stop_orders:
+                            order_id = order.get("algoId") or order.get("orderId")
+                            try:
+                                if order.get("algoId"):
+                                    await binance_api.cancel_algo_order(symbol, str(order_id))
+                                else:
+                                    await binance_api.cancel_order(symbol, str(order_id))
+                                logger.info(f"[{symbol}] 已清理无对应仓位的止损挂单: {order_id}")
+                            except Exception as e:
+                                logger.warning(f"[{symbol}] 清理挂单失败: {e}")
+                    # 清理最高价记录
+                    if symbol in self._highest_prices:
+                        del self._highest_prices[symbol]
+                except Exception as e:
+                    logger.warning(f"[{symbol}] 清理挂单时出错: {e}")
+                return
 
             # 获取当前止损单价格（如果有）
             current_stop_price = None
@@ -338,9 +363,10 @@ class StopLossGuard:
 
             # 如果已经有止损单，根据动态策略调整
             if existing_stop_orders_count > 0 and current_stop_price is not None:
-                # 计算止损价格
+                # 计算止损价格（传入当前止损价格用于比较）
                 new_stop_price = self._calculate_stop_loss_price(parsed_pos, current_price, current_stop_price)
 
+                # 如果返回None，说明当前盈利未达到调整止损的条件，保持现有止损单
                 if new_stop_price is None:
                     logger.debug(f"[{symbol}] 当前盈利未达到调整止损的条件，保持现有止损单")
                     return
@@ -350,22 +376,23 @@ class StopLossGuard:
                 formatted_current = binance_api.format_price(current_stop_price, precision_info)
                 formatted_new = binance_api.format_price(new_stop_price, precision_info)
 
-                # 如果新止损价格与当前相同，不需要调整
+                # 如果新止损价格与当前相同（考虑精度），不需要调整
                 if formatted_current == formatted_new:
                     logger.debug(f"[{symbol}] 止损价格未变化({formatted_current})，跳过调整")
                     return
 
                 # 检查是否需要调整（做多时新止损应该更高，做空时新止损应该更低）
+                # 只有新止损价格更有利时才调整，避免不必要的刷新
                 if parsed_pos['side'] == "LONG":
                     if new_stop_price <= current_stop_price:
                         logger.debug(f"[{symbol}] 新止损价格({new_stop_price})不高于当前止损({current_stop_price})，跳过调整")
                         return
-                else:
+                else:  # SHORT
                     if new_stop_price >= current_stop_price:
                         logger.debug(f"[{symbol}] 新止损价格({new_stop_price})不低于当前止损({current_stop_price})，跳过调整")
                         return
 
-                # 需要调整止损
+                # 只有在新止损价格更有利时才调整
                 logger.info(f"[{symbol}] 需要调整止损: {current_stop_price} -> {new_stop_price}")
                 await self._adjust_stop_loss(
                     symbol=symbol,
