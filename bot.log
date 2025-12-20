@@ -1,0 +1,784 @@
+2025-12-20 15:26:23 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:26:40 - app.services.tg_monitor - INFO - [2025-12-20 15:26:40] 正在检查24小时涨跌幅...
+2025-12-20 15:26:40 - app.services.binance_api - INFO - 找到 17 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 15:26:40 - app.services.tg_monitor - INFO - [2025-12-20 15:26:40] 发现 5 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 15:26:54 - app.services.stop_loss_guard - INFO - [止损守护] 第7516次检查，共1个持仓
+2025-12-20 15:26:54 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:27:25 - app.services.stop_loss_guard - INFO - [止损守护] 第7517次检查，共1个持仓
+2025-12-20 15:27:26 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:27:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7518次检查，共1个持仓
+2025-12-20 15:27:57 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:28:28 - app.services.stop_loss_guard - INFO - [止损守护] 第7519次检查，共1个持仓
+2025-12-20 15:28:29 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:29:00 - app.services.stop_loss_guard - INFO - [止损守护] 第7520次检查，共1个持仓
+2025-12-20 15:29:00 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:29:31 - app.services.stop_loss_guard - INFO - [止损守护] 第7521次检查，共1个持仓
+2025-12-20 15:29:31 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:30:00 - app.main - INFO - [SOPHUSDT] 策略分析第671次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.017066, EMA72=0.017332))
+2025-12-20 15:30:03 - app.services.stop_loss_guard - INFO - [止损守护] 第7522次检查，共1个持仓
+2025-12-20 15:30:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:30:34 - app.services.stop_loss_guard - INFO - [止损守护] 第7523次检查，共1个持仓
+2025-12-20 15:30:34 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:31:05 - app.services.stop_loss_guard - INFO - [止损守护] 第7524次检查，共1个持仓
+2025-12-20 15:31:06 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:31:37 - app.services.stop_loss_guard - INFO - [止损守护] 第7525次检查，共1个持仓
+2025-12-20 15:31:37 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:31:40 - app.services.tg_monitor - INFO - [2025-12-20 15:31:40] 正在检查24小时涨跌幅...
+2025-12-20 15:31:40 - app.services.binance_api - INFO - 找到 17 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 15:31:40 - app.services.tg_monitor - INFO - [2025-12-20 15:31:40] 发现 5 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 15:32:08 - app.services.stop_loss_guard - INFO - [止损守护] 第7526次检查，共1个持仓
+2025-12-20 15:32:08 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:32:40 - app.services.stop_loss_guard - INFO - [止损守护] 第7527次检查，共1个持仓
+2025-12-20 15:32:40 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:33:11 - app.services.stop_loss_guard - INFO - [止损守护] 第7528次检查，共1个持仓
+2025-12-20 15:33:11 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:33:43 - app.services.stop_loss_guard - INFO - [止损守护] 第7529次检查，共1个持仓
+2025-12-20 15:33:43 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:34:14 - app.services.stop_loss_guard - INFO - [止损守护] 第7530次检查，共1个持仓
+2025-12-20 15:34:14 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:34:45 - app.services.stop_loss_guard - INFO - [止损守护] 第7531次检查，共1个持仓
+2025-12-20 15:34:46 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:35:17 - app.services.stop_loss_guard - INFO - [止损守护] 第7532次检查，共1个持仓
+2025-12-20 15:35:17 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:35:48 - app.services.stop_loss_guard - INFO - [止损守护] 第7533次检查，共1个持仓
+2025-12-20 15:35:48 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:36:19 - app.services.stop_loss_guard - INFO - [止损守护] 第7534次检查，共1个持仓
+2025-12-20 15:36:20 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:36:40 - app.services.tg_monitor - INFO - [2025-12-20 15:36:40] 正在检查24小时涨跌幅...
+2025-12-20 15:36:41 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 15:36:41 - app.services.tg_monitor - INFO - [2025-12-20 15:36:40] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 15:36:51 - app.services.stop_loss_guard - INFO - [止损守护] 第7535次检查，共1个持仓
+2025-12-20 15:36:51 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:37:22 - app.services.stop_loss_guard - INFO - [止损守护] 第7536次检查，共1个持仓
+2025-12-20 15:37:23 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:37:54 - app.services.stop_loss_guard - INFO - [止损守护] 第7537次检查，共1个持仓
+2025-12-20 15:37:54 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:38:25 - app.services.stop_loss_guard - INFO - [止损守护] 第7538次检查，共1个持仓
+2025-12-20 15:38:25 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:38:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7539次检查，共1个持仓
+2025-12-20 15:38:57 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:39:28 - app.services.stop_loss_guard - INFO - [止损守护] 第7540次检查，共1个持仓
+2025-12-20 15:39:28 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:39:59 - app.services.stop_loss_guard - INFO - [止损守护] 第7541次检查，共1个持仓
+2025-12-20 15:40:00 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:40:00 - app.main - INFO - [SOPHUSDT] 策略分析第681次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.017171, EMA72=0.017275))
+2025-12-20 15:40:31 - app.services.stop_loss_guard - INFO - [止损守护] 第7542次检查，共1个持仓
+2025-12-20 15:40:31 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:41:02 - app.services.stop_loss_guard - INFO - [止损守护] 第7543次检查，共1个持仓
+2025-12-20 15:41:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:41:34 - app.services.stop_loss_guard - INFO - [止损守护] 第7544次检查，共1个持仓
+2025-12-20 15:41:34 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:41:41 - app.services.tg_monitor - INFO - [2025-12-20 15:41:41] 正在检查24小时涨跌幅...
+2025-12-20 15:41:41 - app.services.binance_api - INFO - 找到 17 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 15:41:41 - app.services.tg_monitor - INFO - [2025-12-20 15:41:41] 发现 5 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 15:42:05 - app.services.stop_loss_guard - INFO - [止损守护] 第7545次检查，共1个持仓
+2025-12-20 15:42:05 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:42:36 - app.services.stop_loss_guard - INFO - [止损守护] 第7546次检查，共1个持仓
+2025-12-20 15:42:37 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:43:08 - app.services.stop_loss_guard - INFO - [止损守护] 第7547次检查，共1个持仓
+2025-12-20 15:43:08 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:43:39 - app.services.stop_loss_guard - INFO - [止损守护] 第7548次检查，共1个持仓
+2025-12-20 15:43:40 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:44:11 - app.services.stop_loss_guard - INFO - [止损守护] 第7549次检查，共1个持仓
+2025-12-20 15:44:11 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:44:42 - app.services.stop_loss_guard - INFO - [止损守护] 第7550次检查，共1个持仓
+2025-12-20 15:44:42 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:45:14 - app.services.stop_loss_guard - INFO - [止损守护] 第7551次检查，共1个持仓
+2025-12-20 15:45:14 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:45:45 - app.services.stop_loss_guard - INFO - [止损守护] 第7552次检查，共1个持仓
+2025-12-20 15:45:45 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:46:17 - app.services.stop_loss_guard - INFO - [止损守护] 第7553次检查，共1个持仓
+2025-12-20 15:46:17 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:46:41 - app.services.tg_monitor - INFO - [2025-12-20 15:46:41] 正在检查24小时涨跌幅...
+2025-12-20 15:46:41 - app.services.binance_api - INFO - 找到 17 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 15:46:41 - app.services.tg_monitor - INFO - [2025-12-20 15:46:41] 发现 5 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 15:46:48 - app.services.stop_loss_guard - INFO - [止损守护] 第7554次检查，共1个持仓
+2025-12-20 15:46:48 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:47:19 - app.services.stop_loss_guard - INFO - [止损守护] 第7555次检查，共1个持仓
+2025-12-20 15:47:20 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:47:51 - app.services.stop_loss_guard - INFO - [止损守护] 第7556次检查，共1个持仓
+2025-12-20 15:47:51 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:48:22 - app.services.stop_loss_guard - INFO - [止损守护] 第7557次检查，共1个持仓
+2025-12-20 15:48:22 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:48:54 - app.services.stop_loss_guard - INFO - [止损守护] 第7558次检查，共1个持仓
+2025-12-20 15:48:54 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:49:25 - app.services.stop_loss_guard - INFO - [止损守护] 第7559次检查，共1个持仓
+2025-12-20 15:49:25 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:49:56 - app.services.stop_loss_guard - INFO - [止损守护] 第7560次检查，共1个持仓
+2025-12-20 15:49:57 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:50:00 - app.main - INFO - [SOPHUSDT] 策略分析第691次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.017511, EMA72=0.017338))
+2025-12-20 15:50:28 - app.services.stop_loss_guard - INFO - [止损守护] 第7561次检查，共1个持仓
+2025-12-20 15:50:28 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:50:59 - app.services.stop_loss_guard - INFO - [止损守护] 第7562次检查，共1个持仓
+2025-12-20 15:51:00 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:51:31 - app.services.stop_loss_guard - INFO - [止损守护] 第7563次检查，共1个持仓
+2025-12-20 15:51:31 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:51:41 - app.services.tg_monitor - INFO - [2025-12-20 15:51:41] 正在检查24小时涨跌幅...
+2025-12-20 15:51:41 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 15:51:41 - app.services.tg_monitor - INFO - [2025-12-20 15:51:41] 发现 5 个涨幅 >= 30.0%，13 个跌幅 >= 30.0%
+2025-12-20 15:52:02 - app.services.stop_loss_guard - INFO - [止损守护] 第7564次检查，共1个持仓
+2025-12-20 15:52:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:52:34 - app.services.stop_loss_guard - INFO - [止损守护] 第7565次检查，共1个持仓
+2025-12-20 15:52:34 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:53:05 - app.services.stop_loss_guard - INFO - [止损守护] 第7566次检查，共1个持仓
+2025-12-20 15:53:05 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:53:36 - app.services.stop_loss_guard - INFO - [止损守护] 第7567次检查，共1个持仓
+2025-12-20 15:53:37 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:54:08 - app.services.stop_loss_guard - INFO - [止损守护] 第7568次检查，共1个持仓
+2025-12-20 15:54:08 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:54:39 - app.services.stop_loss_guard - INFO - [止损守护] 第7569次检查，共1个持仓
+2025-12-20 15:54:39 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:55:11 - app.services.stop_loss_guard - INFO - [止损守护] 第7570次检查，共1个持仓
+2025-12-20 15:55:11 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:55:42 - app.services.stop_loss_guard - INFO - [止损守护] 第7571次检查，共1个持仓
+2025-12-20 15:55:42 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:56:13 - app.services.stop_loss_guard - INFO - [止损守护] 第7572次检查，共1个持仓
+2025-12-20 15:56:14 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:56:41 - app.services.tg_monitor - INFO - [2025-12-20 15:56:41] 正在检查24小时涨跌幅...
+2025-12-20 15:56:41 - app.services.binance_api - INFO - 找到 19 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 15:56:41 - app.services.tg_monitor - INFO - [2025-12-20 15:56:41] 发现 6 个涨幅 >= 30.0%，13 个跌幅 >= 30.0%
+2025-12-20 15:56:45 - app.services.stop_loss_guard - INFO - [止损守护] 第7573次检查，共1个持仓
+2025-12-20 15:56:45 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:57:16 - app.services.stop_loss_guard - INFO - [止损守护] 第7574次检查，共1个持仓
+2025-12-20 15:57:17 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:57:48 - app.services.stop_loss_guard - INFO - [止损守护] 第7575次检查，共1个持仓
+2025-12-20 15:57:48 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:58:19 - app.services.stop_loss_guard - INFO - [止损守护] 第7576次检查，共1个持仓
+2025-12-20 15:58:20 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:58:51 - app.services.stop_loss_guard - INFO - [止损守护] 第7577次检查，共1个持仓
+2025-12-20 15:58:51 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:59:22 - app.services.stop_loss_guard - INFO - [止损守护] 第7578次检查，共1个持仓
+2025-12-20 15:59:23 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 15:59:54 - app.services.stop_loss_guard - INFO - [止损守护] 第7579次检查，共1个持仓
+2025-12-20 15:59:54 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:00:00 - app.main - INFO - [SOPHUSDT] 策略分析第701次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.017267, EMA72=0.017316))
+2025-12-20 16:00:25 - app.services.stop_loss_guard - INFO - [止损守护] 第7580次检查，共1个持仓
+2025-12-20 16:00:26 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:00:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7581次检查，共1个持仓
+2025-12-20 16:00:57 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:01:28 - app.services.stop_loss_guard - INFO - [止损守护] 第7582次检查，共1个持仓
+2025-12-20 16:01:29 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:01:41 - app.services.tg_monitor - INFO - [2025-12-20 16:01:41] 正在检查24小时涨跌幅...
+2025-12-20 16:01:41 - app.services.binance_api - INFO - 找到 19 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:01:41 - app.services.tg_monitor - INFO - [2025-12-20 16:01:41] 发现 6 个涨幅 >= 30.0%，13 个跌幅 >= 30.0%
+2025-12-20 16:02:00 - app.services.stop_loss_guard - INFO - [止损守护] 第7583次检查，共1个持仓
+2025-12-20 16:02:00 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:02:31 - app.services.stop_loss_guard - INFO - [止损守护] 第7584次检查，共1个持仓
+2025-12-20 16:02:32 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:03:03 - app.services.stop_loss_guard - INFO - [止损守护] 第7585次检查，共1个持仓
+2025-12-20 16:03:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:03:34 - app.services.stop_loss_guard - INFO - [止损守护] 第7586次检查，共1个持仓
+2025-12-20 16:03:35 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:04:06 - app.services.stop_loss_guard - INFO - [止损守护] 第7587次检查，共1个持仓
+2025-12-20 16:04:06 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:04:37 - app.services.stop_loss_guard - INFO - [止损守护] 第7588次检查，共1个持仓
+2025-12-20 16:04:37 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:05:09 - app.services.stop_loss_guard - INFO - [止损守护] 第7589次检查，共1个持仓
+2025-12-20 16:05:09 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:05:40 - app.services.stop_loss_guard - INFO - [止损守护] 第7590次检查，共1个持仓
+2025-12-20 16:05:40 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:06:11 - app.services.stop_loss_guard - INFO - [止损守护] 第7591次检查，共1个持仓
+2025-12-20 16:06:12 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:06:41 - app.services.tg_monitor - INFO - [2025-12-20 16:06:41] 正在检查24小时涨跌幅...
+2025-12-20 16:06:41 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:06:41 - app.services.tg_monitor - INFO - [2025-12-20 16:06:41] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 16:06:43 - app.services.stop_loss_guard - INFO - [止损守护] 第7592次检查，共1个持仓
+2025-12-20 16:06:43 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:07:14 - app.services.stop_loss_guard - INFO - [止损守护] 第7593次检查，共1个持仓
+2025-12-20 16:07:15 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:07:46 - app.services.stop_loss_guard - INFO - [止损守护] 第7594次检查，共1个持仓
+2025-12-20 16:07:46 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:08:17 - app.services.stop_loss_guard - INFO - [止损守护] 第7595次检查，共1个持仓
+2025-12-20 16:08:18 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:08:49 - app.services.stop_loss_guard - INFO - [止损守护] 第7596次检查，共1个持仓
+2025-12-20 16:08:49 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:09:20 - app.services.stop_loss_guard - INFO - [止损守护] 第7597次检查，共1个持仓
+2025-12-20 16:09:20 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:09:52 - app.services.stop_loss_guard - INFO - [止损守护] 第7598次检查，共1个持仓
+2025-12-20 16:09:52 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:10:00 - app.main - INFO - [SOPHUSDT] 策略分析第711次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.017277, EMA72=0.017303))
+2025-12-20 16:10:23 - app.services.stop_loss_guard - INFO - [止损守护] 第7599次检查，共1个持仓
+2025-12-20 16:10:23 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:10:54 - app.services.stop_loss_guard - INFO - [止损守护] 第7600次检查，共1个持仓
+2025-12-20 16:10:55 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:11:26 - app.services.stop_loss_guard - INFO - [止损守护] 第7601次检查，共1个持仓
+2025-12-20 16:11:26 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:11:41 - app.services.tg_monitor - INFO - [2025-12-20 16:11:41] 正在检查24小时涨跌幅...
+2025-12-20 16:11:41 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:11:41 - app.services.tg_monitor - INFO - [2025-12-20 16:11:41] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 16:11:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7602次检查，共1个持仓
+2025-12-20 16:11:58 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:12:29 - app.services.stop_loss_guard - INFO - [止损守护] 第7603次检查，共1个持仓
+2025-12-20 16:12:29 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:13:00 - app.services.stop_loss_guard - INFO - [止损守护] 第7604次检查，共1个持仓
+2025-12-20 16:13:00 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:13:32 - app.services.stop_loss_guard - INFO - [止损守护] 第7605次检查，共1个持仓
+2025-12-20 16:13:32 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:14:03 - app.services.stop_loss_guard - INFO - [止损守护] 第7606次检查，共1个持仓
+2025-12-20 16:14:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:14:34 - app.services.stop_loss_guard - INFO - [止损守护] 第7607次检查，共1个持仓
+2025-12-20 16:14:35 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:15:06 - app.services.stop_loss_guard - INFO - [止损守护] 第7608次检查，共1个持仓
+2025-12-20 16:15:06 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:15:37 - app.services.stop_loss_guard - INFO - [止损守护] 第7609次检查，共1个持仓
+2025-12-20 16:15:37 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:16:09 - app.services.stop_loss_guard - INFO - [止损守护] 第7610次检查，共1个持仓
+2025-12-20 16:16:09 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:16:40 - app.services.stop_loss_guard - INFO - [止损守护] 第7611次检查，共1个持仓
+2025-12-20 16:16:40 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:16:41 - app.services.tg_monitor - INFO - [2025-12-20 16:16:41] 正在检查24小时涨跌幅...
+2025-12-20 16:16:42 - app.services.binance_api - INFO - 找到 19 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:16:42 - app.services.tg_monitor - INFO - [2025-12-20 16:16:41] 发现 6 个涨幅 >= 30.0%，13 个跌幅 >= 30.0%
+2025-12-20 16:17:11 - app.services.stop_loss_guard - INFO - [止损守护] 第7612次检查，共1个持仓
+2025-12-20 16:17:12 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:17:43 - app.services.stop_loss_guard - INFO - [止损守护] 第7613次检查，共1个持仓
+2025-12-20 16:17:43 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:18:14 - app.services.stop_loss_guard - INFO - [止损守护] 第7614次检查，共1个持仓
+2025-12-20 16:18:15 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:18:46 - app.services.stop_loss_guard - INFO - [止损守护] 第7615次检查，共1个持仓
+2025-12-20 16:18:46 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:19:17 - app.services.stop_loss_guard - INFO - [止损守护] 第7616次检查，共1个持仓
+2025-12-20 16:19:18 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:19:49 - app.services.stop_loss_guard - INFO - [止损守护] 第7617次检查，共1个持仓
+2025-12-20 16:19:49 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:20:00 - app.main - INFO - [SOPHUSDT] 策略分析第721次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.017012, EMA72=0.017235))
+2025-12-20 16:20:20 - app.services.stop_loss_guard - INFO - [止损守护] 第7618次检查，共1个持仓
+2025-12-20 16:20:20 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:20:51 - app.services.stop_loss_guard - INFO - [止损守护] 第7619次检查，共1个持仓
+2025-12-20 16:20:52 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:21:23 - app.services.stop_loss_guard - INFO - [止损守护] 第7620次检查，共1个持仓
+2025-12-20 16:21:23 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:21:42 - app.services.tg_monitor - INFO - [2025-12-20 16:21:42] 正在检查24小时涨跌幅...
+2025-12-20 16:21:42 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:21:42 - app.services.tg_monitor - INFO - [2025-12-20 16:21:42] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 16:21:54 - app.services.stop_loss_guard - INFO - [止损守护] 第7621次检查，共1个持仓
+2025-12-20 16:21:55 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:22:26 - app.services.stop_loss_guard - INFO - [止损守护] 第7622次检查，共1个持仓
+2025-12-20 16:22:26 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:22:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7623次检查，共1个持仓
+2025-12-20 16:22:58 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:23:29 - app.services.stop_loss_guard - INFO - [止损守护] 第7624次检查，共1个持仓
+2025-12-20 16:23:29 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:24:00 - app.services.stop_loss_guard - INFO - [止损守护] 第7625次检查，共1个持仓
+2025-12-20 16:24:01 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:24:32 - app.services.stop_loss_guard - INFO - [止损守护] 第7626次检查，共1个持仓
+2025-12-20 16:24:32 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:25:03 - app.services.stop_loss_guard - INFO - [止损守护] 第7627次检查，共1个持仓
+2025-12-20 16:25:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:25:35 - app.services.stop_loss_guard - INFO - [止损守护] 第7628次检查，共1个持仓
+2025-12-20 16:25:35 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:26:06 - app.services.stop_loss_guard - INFO - [止损守护] 第7629次检查，共1个持仓
+2025-12-20 16:26:06 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:26:37 - app.services.stop_loss_guard - INFO - [止损守护] 第7630次检查，共1个持仓
+2025-12-20 16:26:38 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:26:42 - app.services.tg_monitor - INFO - [2025-12-20 16:26:42] 正在检查24小时涨跌幅...
+2025-12-20 16:26:42 - app.services.binance_api - INFO - 找到 19 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:26:42 - app.services.tg_monitor - INFO - [2025-12-20 16:26:42] 发现 6 个涨幅 >= 30.0%，13 个跌幅 >= 30.0%
+2025-12-20 16:27:09 - app.services.stop_loss_guard - INFO - [止损守护] 第7631次检查，共1个持仓
+2025-12-20 16:27:09 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:27:40 - app.services.stop_loss_guard - INFO - [止损守护] 第7632次检查，共1个持仓
+2025-12-20 16:27:40 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:28:12 - app.services.stop_loss_guard - INFO - [止损守护] 第7633次检查，共1个持仓
+2025-12-20 16:28:12 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:28:43 - app.services.stop_loss_guard - INFO - [止损守护] 第7634次检查，共1个持仓
+2025-12-20 16:28:43 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:29:14 - app.services.stop_loss_guard - INFO - [止损守护] 第7635次检查，共1个持仓
+2025-12-20 16:29:15 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:29:46 - app.services.stop_loss_guard - INFO - [止损守护] 第7636次检查，共1个持仓
+2025-12-20 16:29:46 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:30:00 - app.main - INFO - [SOPHUSDT] 策略分析第731次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.017060, EMA72=0.017190))
+2025-12-20 16:30:17 - app.services.stop_loss_guard - INFO - [止损守护] 第7637次检查，共1个持仓
+2025-12-20 16:30:18 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:30:49 - app.services.stop_loss_guard - INFO - [止损守护] 第7638次检查，共1个持仓
+2025-12-20 16:30:49 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:31:20 - app.services.stop_loss_guard - INFO - [止损守护] 第7639次检查，共1个持仓
+2025-12-20 16:31:20 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:31:42 - app.services.tg_monitor - INFO - [2025-12-20 16:31:42] 正在检查24小时涨跌幅...
+2025-12-20 16:31:42 - app.services.binance_api - INFO - 找到 20 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:31:42 - app.services.tg_monitor - INFO - [2025-12-20 16:31:42] 发现 7 个涨幅 >= 30.0%，13 个跌幅 >= 30.0%
+2025-12-20 16:31:42 - app.services.tg_monitor - INFO - [2025-12-20 16:31:42] [TRUTHUSDT] 检测到涨幅 30.38% >= 阈值 30.0%
+2025-12-20 16:31:42 - app.services.telegram - INFO - [TRUTHUSDT] 回调函数被调用，变化: 30.384%
+2025-12-20 16:31:42 - app.services.telegram - INFO - [TRUTHUSDT] 交易对已存在（is_active=True），跳过添加
+2025-12-20 16:31:51 - app.services.stop_loss_guard - INFO - [止损守护] 第7640次检查，共1个持仓
+2025-12-20 16:31:52 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:32:23 - app.services.stop_loss_guard - INFO - [止损守护] 第7641次检查，共1个持仓
+2025-12-20 16:32:23 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:32:54 - app.services.stop_loss_guard - INFO - [止损守护] 第7642次检查，共1个持仓
+2025-12-20 16:32:55 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:33:26 - app.services.stop_loss_guard - INFO - [止损守护] 第7643次检查，共1个持仓
+2025-12-20 16:33:26 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:33:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7644次检查，共1个持仓
+2025-12-20 16:33:57 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:34:28 - app.services.stop_loss_guard - INFO - [止损守护] 第7645次检查，共1个持仓
+2025-12-20 16:34:29 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:35:00 - app.services.stop_loss_guard - INFO - [止损守护] 第7646次检查，共1个持仓
+2025-12-20 16:35:01 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:35:32 - app.services.stop_loss_guard - INFO - [止损守护] 第7647次检查，共1个持仓
+2025-12-20 16:35:32 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:36:03 - app.services.stop_loss_guard - INFO - [止损守护] 第7648次检查，共1个持仓
+2025-12-20 16:36:04 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:36:35 - app.services.stop_loss_guard - INFO - [止损守护] 第7649次检查，共1个持仓
+2025-12-20 16:36:35 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:36:42 - app.services.tg_monitor - INFO - [2025-12-20 16:36:42] 正在检查24小时涨跌幅...
+2025-12-20 16:36:42 - app.services.binance_api - INFO - 找到 19 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:36:42 - app.services.tg_monitor - INFO - [2025-12-20 16:36:42] 发现 6 个涨幅 >= 30.0%，13 个跌幅 >= 30.0%
+2025-12-20 16:37:06 - app.services.stop_loss_guard - INFO - [止损守护] 第7650次检查，共1个持仓
+2025-12-20 16:37:07 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:37:38 - app.services.stop_loss_guard - INFO - [止损守护] 第7651次检查，共1个持仓
+2025-12-20 16:37:38 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:38:09 - app.services.stop_loss_guard - INFO - [止损守护] 第7652次检查，共1个持仓
+2025-12-20 16:38:09 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:38:41 - app.services.stop_loss_guard - INFO - [止损守护] 第7653次检查，共1个持仓
+2025-12-20 16:38:41 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:39:12 - app.services.stop_loss_guard - INFO - [止损守护] 第7654次检查，共1个持仓
+2025-12-20 16:39:12 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:39:43 - app.services.stop_loss_guard - INFO - [止损守护] 第7655次检查，共1个持仓
+2025-12-20 16:39:44 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:40:00 - app.main - INFO - [SOPHUSDT] 策略分析第741次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.017108, EMA72=0.017174))
+2025-12-20 16:40:15 - app.services.stop_loss_guard - INFO - [止损守护] 第7656次检查，共1个持仓
+2025-12-20 16:40:15 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:40:46 - app.services.stop_loss_guard - INFO - [止损守护] 第7657次检查，共1个持仓
+2025-12-20 16:40:47 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:41:18 - app.services.stop_loss_guard - INFO - [止损守护] 第7658次检查，共1个持仓
+2025-12-20 16:41:18 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:41:42 - app.services.tg_monitor - INFO - [2025-12-20 16:41:42] 正在检查24小时涨跌幅...
+2025-12-20 16:41:42 - app.services.binance_api - INFO - 找到 19 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:41:42 - app.services.tg_monitor - INFO - [2025-12-20 16:41:42] 发现 6 个涨幅 >= 30.0%，13 个跌幅 >= 30.0%
+2025-12-20 16:41:49 - app.services.stop_loss_guard - INFO - [止损守护] 第7659次检查，共1个持仓
+2025-12-20 16:41:49 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:42:20 - app.services.stop_loss_guard - INFO - [止损守护] 第7660次检查，共1个持仓
+2025-12-20 16:42:21 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:42:52 - app.services.stop_loss_guard - INFO - [止损守护] 第7661次检查，共1个持仓
+2025-12-20 16:42:52 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:43:23 - app.services.stop_loss_guard - INFO - [止损守护] 第7662次检查，共1个持仓
+2025-12-20 16:43:24 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:43:55 - app.services.stop_loss_guard - INFO - [止损守护] 第7663次检查，共1个持仓
+2025-12-20 16:43:55 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:44:26 - app.services.stop_loss_guard - INFO - [止损守护] 第7664次检查，共1个持仓
+2025-12-20 16:44:26 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:44:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7665次检查，共1个持仓
+2025-12-20 16:44:58 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:45:29 - app.services.stop_loss_guard - INFO - [止损守护] 第7666次检查，共1个持仓
+2025-12-20 16:45:29 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:46:00 - app.services.stop_loss_guard - INFO - [止损守护] 第7667次检查，共1个持仓
+2025-12-20 16:46:00 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:46:32 - app.services.stop_loss_guard - INFO - [止损守护] 第7668次检查，共1个持仓
+2025-12-20 16:46:32 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:46:42 - app.services.tg_monitor - INFO - [2025-12-20 16:46:42] 正在检查24小时涨跌幅...
+2025-12-20 16:46:42 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:46:42 - app.services.tg_monitor - INFO - [2025-12-20 16:46:42] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 16:47:03 - app.services.stop_loss_guard - INFO - [止损守护] 第7669次检查，共1个持仓
+2025-12-20 16:47:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:47:34 - app.services.stop_loss_guard - INFO - [止损守护] 第7670次检查，共1个持仓
+2025-12-20 16:47:35 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:48:06 - app.services.stop_loss_guard - INFO - [止损守护] 第7671次检查，共1个持仓
+2025-12-20 16:48:06 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:48:37 - app.services.stop_loss_guard - INFO - [止损守护] 第7672次检查，共1个持仓
+2025-12-20 16:48:38 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:49:09 - app.services.stop_loss_guard - INFO - [止损守护] 第7673次检查，共1个持仓
+2025-12-20 16:49:09 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:49:40 - app.services.stop_loss_guard - INFO - [止损守护] 第7674次检查，共1个持仓
+2025-12-20 16:49:41 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:50:00 - app.main - INFO - [SOPHUSDT] 策略分析第751次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.016892, EMA72=0.017105))
+2025-12-20 16:50:12 - app.services.stop_loss_guard - INFO - [止损守护] 第7675次检查，共1个持仓
+2025-12-20 16:50:12 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:50:43 - app.services.stop_loss_guard - INFO - [止损守护] 第7676次检查，共1个持仓
+2025-12-20 16:50:43 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:51:14 - app.services.stop_loss_guard - INFO - [止损守护] 第7677次检查，共1个持仓
+2025-12-20 16:51:15 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:51:42 - app.services.tg_monitor - INFO - [2025-12-20 16:51:42] 正在检查24小时涨跌幅...
+2025-12-20 16:51:43 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:51:43 - app.services.tg_monitor - INFO - [2025-12-20 16:51:42] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 16:51:46 - app.services.stop_loss_guard - INFO - [止损守护] 第7678次检查，共1个持仓
+2025-12-20 16:51:46 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:52:17 - app.services.stop_loss_guard - INFO - [止损守护] 第7679次检查，共1个持仓
+2025-12-20 16:52:18 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:52:49 - app.services.stop_loss_guard - INFO - [止损守护] 第7680次检查，共1个持仓
+2025-12-20 16:52:49 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:53:20 - app.services.stop_loss_guard - INFO - [止损守护] 第7681次检查，共1个持仓
+2025-12-20 16:53:20 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:53:52 - app.services.stop_loss_guard - INFO - [止损守护] 第7682次检查，共1个持仓
+2025-12-20 16:53:52 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:54:23 - app.services.stop_loss_guard - INFO - [止损守护] 第7683次检查，共1个持仓
+2025-12-20 16:54:23 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:54:54 - app.services.stop_loss_guard - INFO - [止损守护] 第7684次检查，共1个持仓
+2025-12-20 16:54:55 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:55:26 - app.services.stop_loss_guard - INFO - [止损守护] 第7685次检查，共1个持仓
+2025-12-20 16:55:26 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:55:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7686次检查，共1个持仓
+2025-12-20 16:55:57 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:56:28 - app.services.stop_loss_guard - INFO - [止损守护] 第7687次检查，共1个持仓
+2025-12-20 16:56:29 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:56:43 - app.services.tg_monitor - INFO - [2025-12-20 16:56:43] 正在检查24小时涨跌幅...
+2025-12-20 16:56:43 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 16:56:43 - app.services.tg_monitor - INFO - [2025-12-20 16:56:43] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 16:57:00 - app.services.stop_loss_guard - INFO - [止损守护] 第7688次检查，共1个持仓
+2025-12-20 16:57:00 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:57:31 - app.services.stop_loss_guard - INFO - [止损守护] 第7689次检查，共1个持仓
+2025-12-20 16:57:32 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:58:03 - app.services.stop_loss_guard - INFO - [止损守护] 第7690次检查，共1个持仓
+2025-12-20 16:58:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:58:34 - app.services.stop_loss_guard - INFO - [止损守护] 第7691次检查，共1个持仓
+2025-12-20 16:58:34 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:59:06 - app.services.stop_loss_guard - INFO - [止损守护] 第7692次检查，共1个持仓
+2025-12-20 16:59:06 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 16:59:37 - app.services.stop_loss_guard - INFO - [止损守护] 第7693次检查，共1个持仓
+2025-12-20 16:59:37 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:00:00 - app.main - INFO - [SOPHUSDT] 策略分析第761次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.016909, EMA72=0.017057))
+2025-12-20 17:00:09 - app.services.stop_loss_guard - INFO - [止损守护] 第7694次检查，共1个持仓
+2025-12-20 17:00:09 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:00:40 - app.services.stop_loss_guard - INFO - [止损守护] 第7695次检查，共1个持仓
+2025-12-20 17:00:40 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:01:11 - app.services.stop_loss_guard - INFO - [止损守护] 第7696次检查，共1个持仓
+2025-12-20 17:01:12 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:01:43 - app.services.stop_loss_guard - INFO - [止损守护] 第7697次检查，共1个持仓
+2025-12-20 17:01:43 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:01:43 - app.services.tg_monitor - INFO - [2025-12-20 17:01:43] 正在检查24小时涨跌幅...
+2025-12-20 17:01:43 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 17:01:43 - app.services.tg_monitor - INFO - [2025-12-20 17:01:43] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 17:02:14 - app.services.stop_loss_guard - INFO - [止损守护] 第7698次检查，共1个持仓
+2025-12-20 17:02:14 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:02:45 - app.services.stop_loss_guard - INFO - [止损守护] 第7699次检查，共1个持仓
+2025-12-20 17:02:46 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:03:17 - app.services.stop_loss_guard - INFO - [止损守护] 第7700次检查，共1个持仓
+2025-12-20 17:03:17 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:03:48 - app.services.stop_loss_guard - INFO - [止损守护] 第7701次检查，共1个持仓
+2025-12-20 17:03:49 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:04:20 - app.services.stop_loss_guard - INFO - [止损守护] 第7702次检查，共1个持仓
+2025-12-20 17:04:20 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:04:51 - app.services.stop_loss_guard - INFO - [止损守护] 第7703次检查，共1个持仓
+2025-12-20 17:04:52 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:05:23 - app.services.stop_loss_guard - INFO - [止损守护] 第7704次检查，共1个持仓
+2025-12-20 17:05:23 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:05:54 - app.services.stop_loss_guard - INFO - [止损守护] 第7705次检查，共1个持仓
+2025-12-20 17:05:54 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:06:25 - app.services.stop_loss_guard - INFO - [止损守护] 第7706次检查，共1个持仓
+2025-12-20 17:06:26 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:06:43 - app.services.tg_monitor - INFO - [2025-12-20 17:06:43] 正在检查24小时涨跌幅...
+2025-12-20 17:06:43 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 17:06:43 - app.services.tg_monitor - INFO - [2025-12-20 17:06:43] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 17:06:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7707次检查，共1个持仓
+2025-12-20 17:06:57 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:07:28 - app.services.stop_loss_guard - INFO - [止损守护] 第7708次检查，共1个持仓
+2025-12-20 17:07:29 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:08:00 - app.services.stop_loss_guard - INFO - [止损守护] 第7709次检查，共1个持仓
+2025-12-20 17:08:00 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:08:32 - app.services.stop_loss_guard - INFO - [止损守护] 第7710次检查，共1个持仓
+2025-12-20 17:08:32 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:09:03 - app.services.stop_loss_guard - INFO - [止损守护] 第7711次检查，共1个持仓
+2025-12-20 17:09:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:09:35 - app.services.stop_loss_guard - INFO - [止损守护] 第7712次检查，共1个持仓
+2025-12-20 17:09:35 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:10:00 - app.main - INFO - [SOPHUSDT] 策略分析第771次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.016937, EMA72=0.017031))
+2025-12-20 17:10:06 - app.services.stop_loss_guard - INFO - [止损守护] 第7713次检查，共1个持仓
+2025-12-20 17:10:06 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:10:37 - app.services.stop_loss_guard - INFO - [止损守护] 第7714次检查，共1个持仓
+2025-12-20 17:10:38 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:11:09 - app.services.stop_loss_guard - INFO - [止损守护] 第7715次检查，共1个持仓
+2025-12-20 17:11:09 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:11:40 - app.services.stop_loss_guard - INFO - [止损守护] 第7716次检查，共1个持仓
+2025-12-20 17:11:41 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:11:43 - app.services.tg_monitor - INFO - [2025-12-20 17:11:43] 正在检查24小时涨跌幅...
+2025-12-20 17:11:43 - app.services.binance_api - INFO - 找到 17 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 17:11:43 - app.services.tg_monitor - INFO - [2025-12-20 17:11:43] 发现 5 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 17:12:12 - app.services.stop_loss_guard - INFO - [止损守护] 第7717次检查，共1个持仓
+2025-12-20 17:12:12 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:12:43 - app.services.stop_loss_guard - INFO - [止损守护] 第7718次检查，共1个持仓
+2025-12-20 17:12:43 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:13:14 - app.services.stop_loss_guard - INFO - [止损守护] 第7719次检查，共1个持仓
+2025-12-20 17:13:15 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:13:46 - app.services.stop_loss_guard - INFO - [止损守护] 第7720次检查，共1个持仓
+2025-12-20 17:13:46 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:14:17 - app.services.stop_loss_guard - INFO - [止损守护] 第7721次检查，共1个持仓
+2025-12-20 17:14:18 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:14:49 - app.services.stop_loss_guard - INFO - [止损守护] 第7722次检查，共1个持仓
+2025-12-20 17:14:49 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:15:20 - app.services.stop_loss_guard - INFO - [止损守护] 第7723次检查，共1个持仓
+2025-12-20 17:15:21 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:15:52 - app.services.stop_loss_guard - INFO - [止损守护] 第7724次检查，共1个持仓
+2025-12-20 17:15:52 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:16:23 - app.services.stop_loss_guard - INFO - [止损守护] 第7725次检查，共1个持仓
+2025-12-20 17:16:23 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:16:43 - app.services.tg_monitor - INFO - [2025-12-20 17:16:43] 正在检查24小时涨跌幅...
+2025-12-20 17:16:43 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 17:16:43 - app.services.tg_monitor - INFO - [2025-12-20 17:16:43] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 17:16:54 - app.services.stop_loss_guard - INFO - [止损守护] 第7726次检查，共1个持仓
+2025-12-20 17:16:55 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:17:26 - app.services.stop_loss_guard - INFO - [止损守护] 第7727次检查，共1个持仓
+2025-12-20 17:17:26 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:17:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7728次检查，共1个持仓
+2025-12-20 17:17:58 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:18:29 - app.services.stop_loss_guard - INFO - [止损守护] 第7729次检查，共1个持仓
+2025-12-20 17:18:29 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:19:00 - app.services.stop_loss_guard - INFO - [止损守护] 第7730次检查，共1个持仓
+2025-12-20 17:19:00 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:19:32 - app.services.stop_loss_guard - INFO - [止损守护] 第7731次检查，共1个持仓
+2025-12-20 17:19:32 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:20:00 - app.main - INFO - [SOPHUSDT] 策略分析第781次: 无EMA交叉信号 | 条件: EMA交叉:✗(无交叉(EMA9=0.016906, EMA72=0.016994))
+2025-12-20 17:20:03 - app.services.stop_loss_guard - INFO - [止损守护] 第7732次检查，共1个持仓
+2025-12-20 17:20:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:20:34 - app.services.stop_loss_guard - INFO - [止损守护] 第7733次检查，共1个持仓
+2025-12-20 17:20:35 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:21:06 - app.services.stop_loss_guard - INFO - [止损守护] 第7734次检查，共1个持仓
+2025-12-20 17:21:06 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:21:37 - app.services.stop_loss_guard - INFO - [止损守护] 第7735次检查，共1个持仓
+2025-12-20 17:21:38 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:21:43 - app.services.tg_monitor - INFO - [2025-12-20 17:21:43] 正在检查24小时涨跌幅...
+2025-12-20 17:21:44 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 17:21:44 - app.services.tg_monitor - INFO - [2025-12-20 17:21:43] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 17:22:09 - app.services.stop_loss_guard - INFO - [止损守护] 第7736次检查，共1个持仓
+2025-12-20 17:22:09 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:22:40 - app.services.stop_loss_guard - INFO - [止损守护] 第7737次检查，共1个持仓
+2025-12-20 17:22:40 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:23:12 - app.services.stop_loss_guard - INFO - [止损守护] 第7738次检查，共1个持仓
+2025-12-20 17:23:12 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:23:43 - app.services.stop_loss_guard - INFO - [止损守护] 第7739次检查，共1个持仓
+2025-12-20 17:23:43 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:24:14 - app.services.stop_loss_guard - INFO - [止损守护] 第7740次检查，共1个持仓
+2025-12-20 17:24:15 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:24:46 - app.services.stop_loss_guard - INFO - [止损守护] 第7741次检查，共1个持仓
+2025-12-20 17:24:46 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:25:17 - app.services.stop_loss_guard - INFO - [止损守护] 第7742次检查，共1个持仓
+2025-12-20 17:25:18 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:25:49 - app.services.stop_loss_guard - INFO - [止损守护] 第7743次检查，共1个持仓
+2025-12-20 17:25:49 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:26:20 - app.services.stop_loss_guard - INFO - [止损守护] 第7744次检查，共1个持仓
+2025-12-20 17:26:21 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:26:44 - app.services.tg_monitor - INFO - [2025-12-20 17:26:44] 正在检查24小时涨跌幅...
+2025-12-20 17:26:44 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 17:26:44 - app.services.tg_monitor - INFO - [2025-12-20 17:26:44] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 17:26:52 - app.services.stop_loss_guard - INFO - [止损守护] 第7745次检查，共1个持仓
+2025-12-20 17:26:52 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:27:00 - app.main - INFO - [SOPHUSDT] 检测到交易信号: LONG, ✅ 做多信号! 所有条件满足 | 条件详情:
+  EMA交叉: ✓ 金叉(EMA9=0.017021 > EMA72=0.016999)
+  价格vs EMA200: ✓ 价格(0.017175) <= EMA200(0.017237) [已禁用]
+  ADX强度: ✓ ADX(17.45) < 25 [已禁用]
+  成交量突破: ✓ 当前(68078386) >= 阈值(46531720, 1.8x均量)
+  交叉频率: ✓ 前25根交叉0次 <= 2次
+2025-12-20 17:27:00 - app.services.binance_api - ERROR - HTTP请求错误: 状态码=400, 响应={"code":-4046,"msg":"No need to change margin type."}
+2025-12-20 17:27:00 - app.services.binance_api - INFO - [SOPHUSDT] 提交市价单: 买入, 数量=2239
+2025-12-20 17:27:00 - app.services.position_manager - INFO - [SOPHUSDT] 市价单已提交: 订单ID=1412365108, 方向=做多
+2025-12-20 17:27:00 - app.services.position_manager - WARNING - [SOPHUSDT] avgPrice不可用，使用计算价格: 0.017175
+2025-12-20 17:27:00 - app.services.position_manager - WARNING - [SOPHUSDT] executedQty不可用，使用传入数量: 2239.0
+2025-12-20 17:27:00 - app.services.position_manager - INFO - [SOPHUSDT] 设置止损单: 方向=做多, 止损价=0.0168315, 数量=2239.0
+2025-12-20 17:27:00 - app.services.binance_api - INFO - [SOPHUSDT] 提交止损单: 卖出止损, 减仓数量=2239.0, 止损价=0.016831
+2025-12-20 17:27:00 - app.services.binance_api - INFO - [SOPHUSDT] 止损单挂单成功: 0.016831 (ID: None)
+2025-12-20 17:27:23 - app.services.stop_loss_guard - INFO - [止损守护] 第7746次检查，共2个持仓
+2025-12-20 17:27:24 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:27:25 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:27:25 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:27:25 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:27:56 - app.services.stop_loss_guard - INFO - [止损守护] 第7747次检查，共2个持仓
+2025-12-20 17:27:56 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:27:58 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:27:58 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:27:58 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:28:29 - app.services.stop_loss_guard - INFO - [止损守护] 第7748次检查，共2个持仓
+2025-12-20 17:28:29 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:28:30 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:28:30 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:28:30 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:29:02 - app.services.stop_loss_guard - INFO - [止损守护] 第7749次检查，共2个持仓
+2025-12-20 17:29:02 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:29:03 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:29:03 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:29:03 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:29:34 - app.services.stop_loss_guard - INFO - [止损守护] 第7750次检查，共2个持仓
+2025-12-20 17:29:35 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:29:36 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:29:36 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:29:36 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:30:07 - app.services.stop_loss_guard - INFO - [止损守护] 第7751次检查，共2个持仓
+2025-12-20 17:30:07 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:30:09 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:30:09 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:30:09 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:30:40 - app.services.stop_loss_guard - INFO - [止损守护] 第7752次检查，共2个持仓
+2025-12-20 17:30:40 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:30:42 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:30:42 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:30:42 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:31:13 - app.services.stop_loss_guard - INFO - [止损守护] 第7753次检查，共2个持仓
+2025-12-20 17:31:13 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:31:14 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:31:14 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:31:14 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:31:44 - app.services.tg_monitor - INFO - [2025-12-20 17:31:44] 正在检查24小时涨跌幅...
+2025-12-20 17:31:44 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 17:31:44 - app.services.tg_monitor - INFO - [2025-12-20 17:31:44] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 17:31:46 - app.services.stop_loss_guard - INFO - [止损守护] 第7754次检查，共2个持仓
+2025-12-20 17:31:46 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:31:47 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:31:47 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:31:47 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:32:18 - app.services.stop_loss_guard - INFO - [止损守护] 第7755次检查，共2个持仓
+2025-12-20 17:32:19 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:32:20 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:32:20 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:32:20 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:32:51 - app.services.stop_loss_guard - INFO - [止损守护] 第7756次检查，共2个持仓
+2025-12-20 17:32:52 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:32:53 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:32:53 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:32:53 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:33:24 - app.services.stop_loss_guard - INFO - [止损守护] 第7757次检查，共2个持仓
+2025-12-20 17:33:24 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:33:26 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:33:26 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:33:26 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:33:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7758次检查，共2个持仓
+2025-12-20 17:33:57 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:33:58 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:33:58 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:33:58 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:34:29 - app.services.stop_loss_guard - INFO - [止损守护] 第7759次检查，共2个持仓
+2025-12-20 17:34:30 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:34:31 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:34:31 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:34:31 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:35:02 - app.services.stop_loss_guard - INFO - [止损守护] 第7760次检查，共2个持仓
+2025-12-20 17:35:02 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:35:04 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:35:04 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:35:04 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:35:35 - app.services.stop_loss_guard - INFO - [止损守护] 第7761次检查，共2个持仓
+2025-12-20 17:35:35 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:35:36 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:35:36 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:35:36 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:36:08 - app.services.stop_loss_guard - INFO - [止损守护] 第7762次检查，共2个持仓
+2025-12-20 17:36:08 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:36:09 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:36:09 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:36:09 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:36:40 - app.services.stop_loss_guard - INFO - [止损守护] 第7763次检查，共2个持仓
+2025-12-20 17:36:41 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:36:42 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:36:42 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:36:42 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:36:44 - app.services.tg_monitor - INFO - [2025-12-20 17:36:44] 正在检查24小时涨跌幅...
+2025-12-20 17:36:44 - app.services.binance_api - INFO - 找到 18 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 17:36:44 - app.services.tg_monitor - INFO - [2025-12-20 17:36:44] 发现 6 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 17:37:13 - app.services.stop_loss_guard - INFO - [止损守护] 第7764次检查，共2个持仓
+2025-12-20 17:37:13 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:37:15 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:37:15 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:37:15 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:37:46 - app.services.stop_loss_guard - INFO - [止损守护] 第7765次检查，共2个持仓
+2025-12-20 17:37:46 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:37:47 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:37:47 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:37:47 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:38:18 - app.services.stop_loss_guard - INFO - [止损守护] 第7766次检查，共2个持仓
+2025-12-20 17:38:19 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:38:20 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:38:20 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:38:20 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:38:51 - app.services.stop_loss_guard - INFO - [止损守护] 第7767次检查，共2个持仓
+2025-12-20 17:38:52 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:38:53 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:38:53 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:38:53 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:39:24 - app.services.stop_loss_guard - INFO - [止损守护] 第7768次检查，共2个持仓
+2025-12-20 17:39:24 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:39:26 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:39:26 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:39:26 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:39:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7769次检查，共2个持仓
+2025-12-20 17:39:57 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:39:58 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:39:58 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:39:58 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:40:30 - app.services.stop_loss_guard - INFO - [止损守护] 第7770次检查，共2个持仓
+2025-12-20 17:40:30 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:40:31 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:40:31 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:40:31 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:41:02 - app.services.stop_loss_guard - INFO - [止损守护] 第7771次检查，共2个持仓
+2025-12-20 17:41:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:41:04 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:41:04 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:41:04 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:41:35 - app.services.stop_loss_guard - INFO - [止损守护] 第7772次检查，共2个持仓
+2025-12-20 17:41:36 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:41:37 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:41:37 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:41:37 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:41:44 - app.services.tg_monitor - INFO - [2025-12-20 17:41:44] 正在检查24小时涨跌幅...
+2025-12-20 17:41:44 - app.services.binance_api - INFO - 找到 17 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 17:41:44 - app.services.tg_monitor - INFO - [2025-12-20 17:41:44] 发现 6 个涨幅 >= 30.0%，11 个跌幅 >= 30.0%
+2025-12-20 17:42:08 - app.services.stop_loss_guard - INFO - [止损守护] 第7773次检查，共2个持仓
+2025-12-20 17:42:09 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:42:10 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:42:10 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:42:10 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:42:41 - app.services.stop_loss_guard - INFO - [止损守护] 第7774次检查，共2个持仓
+2025-12-20 17:42:41 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:42:43 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:42:43 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:42:43 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:43:14 - app.services.stop_loss_guard - INFO - [止损守护] 第7775次检查，共2个持仓
+2025-12-20 17:43:14 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:43:15 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:43:15 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:43:15 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:43:46 - app.services.stop_loss_guard - INFO - [止损守护] 第7776次检查，共2个持仓
+2025-12-20 17:43:47 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:43:48 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:43:48 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:43:48 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:44:19 - app.services.stop_loss_guard - INFO - [止损守护] 第7777次检查，共2个持仓
+2025-12-20 17:44:19 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:44:21 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:44:21 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:44:21 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:44:52 - app.services.stop_loss_guard - INFO - [止损守护] 第7778次检查，共2个持仓
+2025-12-20 17:44:52 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:44:53 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:44:53 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:44:53 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:45:25 - app.services.stop_loss_guard - INFO - [止损守护] 第7779次检查，共2个持仓
+2025-12-20 17:45:25 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:45:26 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:45:26 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:45:26 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:45:57 - app.services.stop_loss_guard - INFO - [止损守护] 第7780次检查，共2个持仓
+2025-12-20 17:45:58 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:45:59 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:45:59 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:45:59 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:46:30 - app.services.stop_loss_guard - INFO - [止损守护] 第7781次检查，共2个持仓
+2025-12-20 17:46:31 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:46:32 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:46:32 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:46:32 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:46:44 - app.services.tg_monitor - INFO - [2025-12-20 17:46:44] 正在检查24小时涨跌幅...
+2025-12-20 17:46:44 - app.services.binance_api - INFO - 找到 19 个涨跌幅绝对值 >= 30.0% 的币种
+2025-12-20 17:46:44 - app.services.tg_monitor - INFO - [2025-12-20 17:46:44] 发现 7 个涨幅 >= 30.0%，12 个跌幅 >= 30.0%
+2025-12-20 17:47:03 - app.services.stop_loss_guard - INFO - [止损守护] 第7782次检查，共2个持仓
+2025-12-20 17:47:03 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:47:05 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:47:05 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:47:05 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:47:36 - app.services.stop_loss_guard - INFO - [止损守护] 第7783次检查，共2个持仓
+2025-12-20 17:47:36 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:47:37 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:47:37 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:47:37 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:48:08 - app.services.stop_loss_guard - INFO - [止损守护] 第7784次检查，共2个持仓
+2025-12-20 17:48:09 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:48:10 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:48:10 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:48:10 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:48:41 - app.services.stop_loss_guard - INFO - [止损守护] 第7785次检查，共2个持仓
+2025-12-20 17:48:41 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:48:42 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:48:42 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:48:42 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:49:14 - app.services.stop_loss_guard - INFO - [止损守护] 第7786次检查，共2个持仓
+2025-12-20 17:49:14 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单
+2025-12-20 17:49:15 - app.services.binance_api - INFO - [SOPHUSDT] 总共获取到1个挂单: ['STOP_MARKET(ID:4000000086013227)']
+2025-12-20 17:49:15 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 查询到1个挂单
+2025-12-20 17:49:15 - app.services.stop_loss_guard - INFO - [SOPHUSDT] 挂单详情: type=None, ID=4000000086013227, stopPrice=0.0168310
+2025-12-20 17:49:46 - app.services.stop_loss_guard - INFO - [止损守护] 第7787次检查，共2个持仓
+2025-12-20 17:49:47 - app.services.stop_loss_guard - INFO - [CHZUSDT] 查询到0个挂单

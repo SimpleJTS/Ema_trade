@@ -114,6 +114,32 @@ class StopLossGuard:
             profit = ((entry_price - current_price) / entry_price) * 100
         return profit
 
+    def _calculate_initial_stop_loss_price(self, parsed_pos: dict) -> float:
+        """计算初始止损价格（基于入场价的一定百分比，默认-2%）
+        
+        Args:
+            parsed_pos: 解析后的持仓数据
+            
+        Returns:
+            初始止损价格
+        """
+        symbol = parsed_pos['symbol']
+        side = parsed_pos['side']
+        entry_price = parsed_pos['entry_price']
+        
+        # 默认初始止损为入场价的-2%（做多时止损低于入场价，做空时止损高于入场价）
+        initial_stop_percent = -2.0
+        
+        if side == "LONG":
+            # 做多：止损价 = 入场价 * (1 - 2%)
+            initial_stop_price = entry_price * (1 + initial_stop_percent / 100)
+        else:
+            # 做空：止损价 = 入场价 * (1 + 2%)
+            initial_stop_price = entry_price * (1 - initial_stop_percent / 100)
+        
+        logger.info(f"[{symbol}] 计算初始止损价: 入场价={entry_price}, 止损价={initial_stop_price} (基于{abs(initial_stop_percent)}%止损)")
+        return initial_stop_price
+
     def _calculate_stop_loss_price(self, parsed_pos: dict, current_price: float, current_stop_price: Optional[float] = None) -> Optional[float]:
         """计算止损价格
         
@@ -297,9 +323,11 @@ class StopLossGuard:
                     for o in open_orders:
                         order_id = o.get('algoId') or o.get('orderId', 'N/A')
                         stop_price = o.get('stopPrice') or o.get('triggerPrice', 'N/A')
-                        logger.info(f"[{symbol}] 挂单详情: type={o.get('type')}, ID={order_id}, stopPrice={stop_price}")
+                        order_type = o.get('orderType') or o.get('type', 'N/A')
+                        logger.info(f"[{symbol}] 挂单详情: type={order_type}, ID={order_id}, stopPrice={stop_price}")
                 # 检查所有类型的止损单（算法订单和普通订单）
-                stop_orders = [o for o in open_orders if o.get("type") in ("STOP_MARKET", "STOP", "STOP_LOSS", "STOP_LOSS_LIMIT")]
+                # 算法订单使用orderType，普通订单使用type
+                stop_orders = [o for o in open_orders if (o.get("type") or o.get("orderType")) in ("STOP_MARKET", "STOP", "STOP_LOSS", "STOP_LOSS_LIMIT")]
                 existing_stop_orders_count = len(stop_orders)
                 if stop_orders:
                     # 算法订单使用triggerPrice，普通订单使用stopPrice
@@ -308,7 +336,7 @@ class StopLossGuard:
             except Exception as e:
                 logger.warning(f"[{symbol}] 检查当前止损单失败: {e}")
 
-            # 如果已经有止损单，不再重复下单（除非价格需要调整）
+            # 如果已经有止损单，根据动态策略调整
             if existing_stop_orders_count > 0 and current_stop_price is not None:
                 # 计算止损价格
                 new_stop_price = self._calculate_stop_loss_price(parsed_pos, current_price, current_stop_price)
@@ -346,21 +374,59 @@ class StopLossGuard:
                     stop_price=new_stop_price
                 )
             else:
-                # 没有止损单，检查是否需要创建
+                # 没有止损单，必须创建一个初始止损单
+                # 优先使用动态策略计算的止损价格，如果未达到条件则使用初始止损价格
                 new_stop_price = self._calculate_stop_loss_price(parsed_pos, current_price, None)
-                if new_stop_price is not None:
-                    logger.info(f"[{symbol}] 未检测到止损单，创建新止损: {new_stop_price}")
-                    await self._adjust_stop_loss(
-                        symbol=symbol,
-                        side=parsed_pos['side'],
-                        quantity=parsed_pos['quantity'],
-                        stop_price=new_stop_price
-                    )
+                if new_stop_price is None:
+                    # 如果动态策略未触发，使用初始止损价格（基于入场价的-2%）
+                    new_stop_price = self._calculate_initial_stop_loss_price(parsed_pos)
+                    logger.info(f"[{symbol}] 未检测到止损单，创建初始止损: {new_stop_price}")
                 else:
-                    logger.debug(f"[{symbol}] 未检测到止损单，但当前盈利未达到设置止损的条件")
+                    logger.info(f"[{symbol}] 未检测到止损单，创建动态止损: {new_stop_price}")
+                
+                await self._adjust_stop_loss(
+                    symbol=symbol,
+                    side=parsed_pos['side'],
+                    quantity=parsed_pos['quantity'],
+                    stop_price=new_stop_price
+                )
             
         except Exception as e:
             logger.error(f"处理持仓失败: {e}")
+
+    async def _cleanup_orphan_orders(self, positions: List[dict]):
+        """清理无对应仓位的挂单
+        
+        Args:
+            positions: 当前持仓列表
+        """
+        try:
+            # 获取所有持仓的交易对
+            position_symbols = {p.get("symbol") for p in positions}
+            
+            # 获取所有挂单
+            all_orders = await binance_api.get_open_orders()
+            if not all_orders:
+                return
+            
+            # 找出止损单（算法订单使用orderType，普通订单使用type）
+            stop_orders = [o for o in all_orders if (o.get("type") or o.get("orderType")) in ("STOP_MARKET", "STOP", "STOP_LOSS", "STOP_LOSS_LIMIT")]
+            
+            for order in stop_orders:
+                order_symbol = order.get("symbol")
+                # 如果挂单对应的币种没有持仓，则取消该挂单
+                if order_symbol not in position_symbols:
+                    order_id = order.get("algoId") or order.get("orderId")
+                    try:
+                        if order.get("algoId"):
+                            await binance_api.cancel_algo_order(order_symbol, str(order_id))
+                        else:
+                            await binance_api.cancel_order(order_symbol, str(order_id))
+                        logger.info(f"[{order_symbol}] 已清理无对应仓位的止损挂单: {order_id}")
+                    except Exception as e:
+                        logger.warning(f"[{order_symbol}] 清理挂单失败: {e}")
+        except Exception as e:
+            logger.error(f"清理无对应仓位的挂单失败: {e}")
 
     async def _check_loop(self):
         """止损守护检查循环"""
@@ -376,7 +442,10 @@ class StopLossGuard:
                 if positions:
                     logger.info(f"[止损守护] 第{check_count}次检查，共{len(positions)}个持仓")
 
-                    # 2. 处理每个持仓
+                    # 2. 清理无对应仓位的挂单
+                    await self._cleanup_orphan_orders(positions)
+
+                    # 3. 处理每个持仓
                     for position_data in positions:
                         await self._process_position(position_data)
                         # 每个持仓间隔1秒，避免API限频
@@ -387,6 +456,23 @@ class StopLossGuard:
                         logger.info(f"[止损守护] 第{check_count}次检查，当前无持仓")
                     # 清空最高价记录
                     self._highest_prices.clear()
+                    # 清理所有挂单（因为没有持仓了）
+                    try:
+                        all_orders = await binance_api.get_open_orders()
+                        stop_orders = [o for o in all_orders if (o.get("type") or o.get("orderType")) in ("STOP_MARKET", "STOP", "STOP_LOSS", "STOP_LOSS_LIMIT")]
+                        for order in stop_orders:
+                            order_symbol = order.get("symbol")
+                            order_id = order.get("algoId") or order.get("orderId")
+                            try:
+                                if order.get("algoId"):
+                                    await binance_api.cancel_algo_order(order_symbol, str(order_id))
+                                else:
+                                    await binance_api.cancel_order(order_symbol, str(order_id))
+                                logger.info(f"[{order_symbol}] 已清理无对应仓位的止损挂单: {order_id}")
+                            except Exception as e:
+                                logger.warning(f"[{order_symbol}] 清理挂单失败: {e}")
+                    except Exception as e:
+                        logger.warning(f"清理挂单失败: {e}")
 
                 await asyncio.sleep(self._check_interval)
 
